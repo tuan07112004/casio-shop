@@ -1,0 +1,18 @@
+.product-showcase {
+  margin-bottom: 8px;
+}
+
+.showcase-more {
+  text-align: center;
+  margin: 8px 0 0;
+}
+
+.showcase-more a {
+  color: #374151;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.showcase-more a:hover {
+  text-decoration: underline;
+}

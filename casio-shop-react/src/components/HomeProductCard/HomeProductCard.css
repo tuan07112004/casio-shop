@@ -1,0 +1,144 @@
+.home-product-card {
+  list-style: none;
+}
+
+.home-product-card-link {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(10, 22, 40, 0.08);
+  border: 1px solid #e8edf3;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  height: 100%;
+}
+
+.home-product-card-link:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(10, 22, 40, 0.14);
+}
+
+/* Ảnh nền xanh — máy tính & phụ kiện */
+.home-product-visual {
+  position: relative;
+}
+
+.home-product-visual--dark {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 85%, rgba(0, 180, 255, 0.35) 0%, transparent 70%),
+    linear-gradient(165deg, #0b1a33 0%, #132a52 45%, #0a1628 100%);
+}
+
+.home-product-visual--dark::before {
+  content: '';
+  position: absolute;
+  bottom: 18%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72%;
+  height: 12%;
+  background: radial-gradient(
+    ellipse,
+    rgba(0, 200, 255, 0.55) 0%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  pointer-events: none;
+}
+
+.home-product-visual--dark img {
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.35));
+}
+
+/* Ảnh nền trắng — balo */
+.home-product-visual--light {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #fff;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.home-product-visual--light img {
+  filter: drop-shadow(0 4px 12px rgba(15, 39, 68, 0.12));
+}
+
+.home-product-visual img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.home-product-promo {
+  background: #ff720d;
+  color: #fff;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 8px 10px;
+  letter-spacing: 0.02em;
+}
+
+.home-product-pricing {
+  padding: 14px 16px 12px;
+  text-align: center;
+  background: #fff8f3;
+  border-radius: 0 0 4px 4px;
+}
+
+.home-product-price {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #ff720d;
+  line-height: 1.2;
+}
+
+.home-product-meta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.home-product-old {
+  color: #94a3b8;
+  font-size: 0.9rem;
+  text-decoration: line-through;
+}
+
+.home-product-off {
+  color: #ff720d;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.home-product-card-link--dark .home-product-off {
+  color: #dc2626;
+}
+
+.home-product-label {
+  margin: 10px 12px 14px;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #334155;
+  background: #f5f5f5;
+  border: 1px solid #e8e8e8;
+  border-radius: 999px;
+}

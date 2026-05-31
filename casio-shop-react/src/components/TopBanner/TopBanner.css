@@ -1,0 +1,27 @@
+.top-banner {
+  width: 100%;
+  background: #b8ddf5;
+  line-height: 0;
+}
+
+.top-banner-link {
+  display: block;
+  width: 100%;
+  height: clamp(48px, 5.5vw, 72px);
+  background-color: #b8ddf5;
+  background-image: url('/images/bannerTren.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  transition: opacity 0.2s ease;
+}
+
+.top-banner-link:hover {
+  opacity: 0.92;
+}
+
+@media (max-width: 640px) {
+  .top-banner-link {
+    height: clamp(40px, 12vw, 56px);
+  }
+}
