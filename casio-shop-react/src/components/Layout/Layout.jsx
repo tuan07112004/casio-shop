@@ -3,6 +3,7 @@ import Header from '../Header/Header'
 import Footer from '../Footer/Footer'
 import Banner from '../Banner/Banner'
 import './Layout.css'
+import LogoMarquee from '../LogoMarquee/LogoMarquee'
 
 export default function Layout() {
   const isHome = useLocation().pathname === '/'
@@ -14,6 +15,8 @@ export default function Layout() {
       <main className="layout-main">
         <Outlet />
       </main>
+      {isHome && <LogoMarquee />}
+
       <Footer />
     </div>
   )

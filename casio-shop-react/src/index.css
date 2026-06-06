@@ -2,13 +2,23 @@
   box-sizing: border-box;
 }
 
+:root {
+  --page-bg: #F5F0E6;
+  --surface: #ffffff;
+  --surface-muted: #f5f0e8;
+  --text: #111827;
+  --font-display: 'Playfair Display', Georgia, serif;
+}
+
 body {
   margin: 0;
-  min-height: 100vh;
-  background: #fff;
-  font-family: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  font-size: 16px;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  background: var(--page-bg);
+  color: var(--text);
   line-height: 1.5;
-  color: #111827;
-  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+  background: var(--page-bg);
 }

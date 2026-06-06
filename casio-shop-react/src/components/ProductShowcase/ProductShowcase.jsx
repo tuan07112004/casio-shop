@@ -1,74 +1,137 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchProducts } from '../../api/client'
-import { products as localProducts } from '../../data/products'
-import HomeProductSection from '../HomeProductSection/HomeProductSection'
+import { formatPrice, productImageSrc } from '../../utils/format'
 import './ProductShowcase.css'
 
-const CALCULATOR_IDS = ['casio-580vnx', 'casio-880btg', 'casio-570vn-plus']
-const ACCESSORY_IDS = ['tua-vit-pin', 'kinh-cuong-luc', 'bao-da']
+const SECTIONS = [
+  {
+    key: 'may-tinh',
+    title: 'Máy tính Casio',
+    shopUrl: '/cua-hang?category=may-tinh',
+  },
+  {
+    key: 'balo',
+    title: 'Balo',
+    shopUrl: '/cua-hang?category=balo',
+  },
+  {
+    key: 'phu-kien',
+    title: 'Phụ kiện',
+    shopUrl: '/cua-hang?category=phu-kien',
+  },
+]
 
-const ACCESSORY_LABELS = {
-  'tua-vit-pin': 'Tô vít',
-  'kinh-cuong-luc': 'Kính cường lực',
-  'bao-da': 'Bao da',
+const LIMIT = 3
+
+function getOriginalPrice(price) {
+  return Math.ceil((price * 1.15) / 1000) * 1000
 }
 
-const BAG_IDS = ['balo-cap-1', 'balo-cap-2', 'balo-cap-3']
+function ProductCard({ product }) {
+  const cat = product.category || 'phu-kien'
+  const originalPrice = getOriginalPrice(product.price)
 
-const BAG_LABELS = {
-  'balo-cap-1': 'Cặp đa năng',
-  'balo-cap-2': 'Ba lô thời trang',
-  'balo-cap-3': 'Balo cấp 2',
-}
-
-function pickByIds(list, ids) {
-  return ids
-    .map((id) => list.find((p) => p.id === id))
-    .filter(Boolean)
+  return (
+    <li className="product-showcase-card">
+      <Link to={`/san-pham/${product.id}`} className="product-showcase-link">
+        <div className={`product-showcase-visual product-showcase-visual--${cat}`}>
+          <img
+            className="product-showcase-img"
+            src={productImageSrc(product.image)}
+            alt={product.name}
+            loading="lazy"
+          />
+        </div>
+        <div className="product-showcase-body">
+          <h3 className="product-showcase-name">{product.name}</h3>
+          <div className="product-showcase-prices">
+            <span className="product-showcase-price-original">
+              {formatPrice(originalPrice)}
+            </span>
+            <span className="product-showcase-price-sale">
+              {formatPrice(product.price)}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </li>
+  )
 }
 
 export default function ProductShowcase() {
-  const [calculators, setCalculators] = useState(() =>
-    pickByIds(localProducts, CALCULATOR_IDS),
-  )
-  const [accessories, setAccessories] = useState(() =>
-    pickByIds(localProducts, ACCESSORY_IDS),
-  )
-  const [bags, setBags] = useState(() => pickByIds(localProducts, BAG_IDS))
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchProducts()
-      .then((data) => {
-        setCalculators(pickByIds(data, CALCULATOR_IDS))
-        setAccessories(pickByIds(data, ACCESSORY_IDS))
-        setBags(pickByIds(data, BAG_IDS))
-      })
-      .catch(() => {
-        /* giữ data local */
-      })
+      .then(setProducts)
+      .catch(() => setProducts([]))
+      .finally(() => setLoading(false))
   }, [])
+
+  const byCategory = useMemo(() => {
+    const map = { 'may-tinh': [], balo: [], 'phu-kien': [] }
+    for (const p of products) {
+      if (map[p.category]) map[p.category].push(p)
+    }
+    return map
+  }, [products])
+
+  const visibleSections = useMemo(
+    () =>
+      SECTIONS.map((section) => ({
+        ...section,
+        products: (byCategory[section.key] || []).slice(0, LIMIT),
+      })).filter((section) => section.products.length > 0),
+    [byCategory],
+  )
+
+  if (loading) {
+    return (
+      <section className="product-showcase">
+        <p className="product-showcase-status">Đang tải sản phẩm...</p>
+      </section>
+    )
+  }
+
+  if (!visibleSections.length) return null
 
   return (
     <div className="product-showcase">
-      <HomeProductSection
-        title="Máy tính bán chạy"
-        products={calculators}
-      />
-      <HomeProductSection
-        title="Phụ kiện máy tính"
-        products={accessories}
-        labels={ACCESSORY_LABELS}
-      />
-      <HomeProductSection
-        title="Balo học sinh"
-        products={bags}
-        labels={BAG_LABELS}
-        variant="light"
-      />
-      <p className="showcase-more">
-        <Link to="/cua-hang">Xem tất cả sản phẩm →</Link>
-      </p>
+      {visibleSections.map((section) => (
+        <section
+          key={section.key}
+          className="product-showcase-section"
+          aria-labelledby={`product-showcase-${section.key}`}
+        >
+          <div className="product-showcase-head">
+            <div className="product-showcase-title-wrap">
+              <span className="product-showcase-sparkle product-showcase-sparkle--left" aria-hidden>
+                ✦
+              </span>
+              <h2 id={`product-showcase-${section.key}`} className="product-showcase-title">
+                {section.title}
+              </h2>
+              <span className="product-showcase-sparkle product-showcase-sparkle--right" aria-hidden>
+                ✦
+              </span>
+            </div>
+            <Link
+              to={section.shopUrl}
+              className="product-showcase-view-all"
+            >
+              Xem tất cả →
+            </Link>
+          </div>
+
+          <ul className="product-showcase-grid">
+            {section.products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </ul>
+        </section>
+      ))}
     </div>
   )
 }

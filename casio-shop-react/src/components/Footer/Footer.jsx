@@ -1,11 +1,11 @@
 import { Link } from 'react-router-dom'
 import './Footer.css'
 
-const quickLinks = [
-  { to: '/', label: 'Trang chủ' },
-  { to: '/cua-hang', label: 'Cửa hàng' },
-  { to: '/cua-hang?category=calculator', label: 'Máy tính Casio' },
-  { to: '/gio-hang', label: 'Giỏ hàng' },
+const PRODUCT_LINKS = [
+  { to: '/cua-hang', label: 'Tất cả sản phẩm' },
+  { to: '/cua-hang?category=may-tinh', label: 'Máy tính' },
+  { to: '/cua-hang?category=phu-kien', label: 'Phụ kiện' },
+  { to: '/cua-hang?category=balo', label: 'Balo' },
 ]
 
 export default function Footer() {
@@ -14,18 +14,20 @@ export default function Footer() {
       <div className="footer-inner">
         <div className="footer-grid">
           <div className="footer-brand">
-            <Link to="/" className="footer-logo">
-              Casio Shop
-            </Link>
+            <h3 className="footer-col-title">Lytus Casio</h3>
             <p className="footer-tagline">
-              Máy tính Casio chính hãng, phụ kiện và balo học sinh.
+              Máy tính Casio chính hãng — phụ kiện &amp; balo học sinh.
             </p>
+            <p className="footer-about">
+              Đại lý phân phối máy tính Casio tại Việt Nam.
+            </p>
+            <p className="footer-hours">Giờ làm việc: 8:00 – 17:30 (T2–T7)</p>
           </div>
 
           <div className="footer-col">
-            <h3>Liên kết</h3>
+            <h3 className="footer-col-title">Sản phẩm</h3>
             <nav className="footer-nav">
-              {quickLinks.map((item) => (
+              {PRODUCT_LINKS.map((item) => (
                 <Link key={item.to} to={item.to}>
                   {item.label}
                 </Link>
@@ -34,36 +36,15 @@ export default function Footer() {
           </div>
 
           <div className="footer-col">
-            <h3>Hỗ trợ</h3>
-            <ul className="footer-list">
-              <li>Chính sách đổi trả</li>
-              <li>Hướng dẫn mua hàng</li>
-              <li>Kiểm tra bảo hành</li>
-            </ul>
+            <h3 className="footer-col-title">Hỗ trợ</h3>
+            <nav className="footer-nav">
+              <Link to="/">Trang chủ</Link>
+              <Link to="/gio-hang">Giỏ hàng</Link>
+              <Link to="/faq">FAQ</Link>
+              <a href="tel:19002152">Hotline: 1900 2152</a>
+              <a href="mailto:lytuscasio@gmail.com">lytuscasio@gmail.com</a>
+            </nav>
           </div>
-
-          <div className="footer-col footer-contact">
-            <h3>Liên hệ</h3>
-            <ul className="footer-list">
-              <li>
-                <span className="footer-label">Hotline</span>
-                <a href="tel:19001234">1900 1234</a>
-              </li>
-              <li>
-                <span className="footer-label">Email</span>
-                <a href="mailto:support@casioshop.vn">support@casioshop.vn</a>
-              </li>
-              <li>
-                <span className="footer-label">Giờ làm việc</span>
-                8:00 – 21:00 (T2–CN)
-              </li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} Casio Shop. Bảo lưu mọi quyền.</p>
-          <p className="footer-tech">React + Laravel · Dự án demo</p>
         </div>
       </div>
     </footer>

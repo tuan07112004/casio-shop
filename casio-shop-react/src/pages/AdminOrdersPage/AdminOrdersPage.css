@@ -1,0 +1,207 @@
+.admin-orders {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.admin-orders-loading {
+  text-align: center;
+  padding: 48px 20px;
+  color: #64748b;
+}
+
+.admin-orders--error {
+  color: #b42318;
+  padding: 24px;
+  background: #fef2f2;
+  border-radius: 12px;
+}
+
+.admin-orders-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.admin-orders-header h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 1.85rem);
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.admin-orders-desc {
+  margin: 6px 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.admin-orders-back {
+  flex-shrink: 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1a1a1a;
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.admin-orders-back:hover {
+  background: #f8fafc;
+}
+
+.admin-orders-empty {
+  padding: 40px;
+  text-align: center;
+  background: #fff;
+  border-radius: 14px;
+  color: #64748b;
+}
+
+.admin-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-order-card {
+  padding: 20px 22px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.admin-order-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-order-id-block strong {
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.admin-order-id-block time {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.admin-order-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.admin-order-badge--pending { background: #fef3c7; color: #92400e; }
+.admin-order-badge--confirmed { background: #dbeafe; color: #1e40af; }
+.admin-order-badge--shipping { background: #e0e7ff; color: #3730a3; }
+.admin-order-badge--completed { background: #dcfce7; color: #166534; }
+.admin-order-badge--cancelled { background: #fee2e2; color: #991b1b; }
+
+.admin-order-customer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+  font-size: 0.92rem;
+}
+
+.admin-order-name {
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.admin-order-phone {
+  color: #007a8c;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.admin-order-phone:hover {
+  text-decoration: underline;
+}
+
+.admin-order-email {
+  color: #64748b;
+}
+
+.admin-order-address {
+  margin: 0 0 14px;
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.admin-order-items {
+  list-style: none;
+  margin: 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.admin-order-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+  color: #334155;
+}
+
+.admin-order-foot {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.admin-order-meta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.admin-order-payment {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.admin-order-total {
+  font-size: 1.2rem;
+  color: #2d4f2a;
+}
+
+.admin-order-status-select {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-order-status-select select {
+  padding: 8px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.9rem;
+  min-width: 160px;
+  background: #fff;
+}

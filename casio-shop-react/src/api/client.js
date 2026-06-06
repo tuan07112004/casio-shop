@@ -1,31 +1,46 @@
-const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'
+import { productImageSrc } from '../utils/format'
 
-export function mapApiProduct(p) {
-  if (!p) return null
+const API = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'  // khai báo địa chỉ BE
+
+// BE trả về dữ liệu 
+export function mapApiProduct(row) {
   return {
-    id: p.id,
-    name: p.name,
-    price: p.price,
-    originalPrice: p.original_price ?? p.originalPrice ?? null,
-    image: p.image,
-    category: p.category,
-    stock: p.stock ?? null,
-    description: p.description ?? null,
+    id: row.id,
+    name: row.name,
+    price: row.price,
+    image: productImageSrc(row.image),
+    category: row.category,
   }
 }
 
-export async function fetchProducts(category) {
-  const url = category
-    ? `${API}/api/products?category=${encodeURIComponent(category)}`
-    : `${API}/api/products`
-  const res = await fetch(url)
-  if (!res.ok) throw new Error('Lỗi tải sản phẩm')
-  const data = await res.json()
-  return data.map(mapApiProduct)
+export async function fetchProducts() {
+  const res = await fetch(`${API}/api/products`) // gọi API để lấy danh sách sản phẩm
+  if (!res.ok) throw new Error('Không tải được danh sách sản phẩm')
+  const data = await res.json()  // chuyển json thành object
+  return data.map(mapApiProduct) // áp dụng hàm mapApiProduct cho mỗi sản phẩm
 }
 
-export async function fetchProductById(id) {
-  const res = await fetch(`${API}/api/products/${encodeURIComponent(id)}`)
-  if (!res.ok) throw new Error('Không tìm thấy')
+export async function fetchProduct(id) {
+  const res = await fetch(`${API}/api/products/${id}`)
+  if (!res.ok) throw new Error('Không tìm thấy sản phẩm')
   return mapApiProduct(await res.json())
+}
+
+const CATEGORY_KEYWORDS = {
+  'may-tinh': 'máy tính casio',
+  'phu-kien': 'phụ kiện',
+  balo: 'balo',
+}
+
+/** Tìm theo tên + từ khóa danh mục; hỗ trợ nhiều từ */
+export function filterProductsByQuery(products, rawQuery) {
+  const q = String(rawQuery || '').trim().toLowerCase()
+  if (!q) return products
+
+  const terms = q.split(/\s+/).filter(Boolean)
+
+  return products.filter((p) => {
+    const haystack = `${p.name} ${CATEGORY_KEYWORDS[p.category] || p.category}`.toLowerCase()
+    return terms.every((term) => haystack.includes(term))
+  })
 }

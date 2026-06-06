@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Link,
   NavLink,
@@ -6,16 +6,33 @@ import {
   useNavigate,
   useSearchParams,
 } from 'react-router-dom'
+import { fetchProducts, filterProductsByQuery } from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 import { useCart } from '../../context/CartContext'
-import useAnimatedPlaceholder from '../../hooks/useAnimatedPlaceholder'
+import useAnimated from '../../hooks/useAnimated'
+import { formatPrice, productImageSrc } from '../../utils/format'
 import './Header.css'
+
+const LIVE_SEARCH_LIMIT = 6
 
 const productLinks = [
   { to: '/cua-hang', label: 'Tất cả sản phẩm' },
-  { to: '/cua-hang?category=calculator', label: 'Máy tính' },
-  { to: '/cua-hang?category=accessory', label: 'Phụ kiện' },
-  { to: '/cua-hang?category=bag', label: 'Balo' },
+  { to: '/cua-hang?category=may-tinh', label: 'Máy tính' },
+  { to: '/cua-hang?category=phu-kien', label: 'Phụ kiện' },
+  { to: '/cua-hang?category=balo', label: 'Balo' },
 ]
+
+const accountIcon = (
+  <span className="header-account-icon" aria-hidden>
+    <img
+      src="/images/icon/iconAcc.png"
+      alt=""
+      className="header-account-icon-img"
+      width={28}
+      height={28}
+    />
+  </span>
+)
 
 function NavDropdown({ label, links, icon }) {
   return (
@@ -24,7 +41,7 @@ function NavDropdown({ label, links, icon }) {
         {icon && <img src={icon} alt="" className="nav-link-icon" />}
         {label}
         <span className="nav-chevron" aria-hidden>
-          +
+          +{' '}
         </span>
       </button>
       <ul className="nav-dropdown-menu">
@@ -40,167 +57,287 @@ function NavDropdown({ label, links, icon }) {
 
 export default function Header() {
   const { totalItems } = useCart()
+  const { user, isLoggedIn, logout, booting, isAdmin } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [searchParams] = useSearchParams()
   const [query, setQuery] = useState('')
   const [searchFocused, setSearchFocused] = useState(false)
+  const [products, setProducts] = useState([])
   const showAnimatedPlaceholder = !query && !searchFocused
-  const animatedPlaceholder = useAnimatedPlaceholder(showAnimatedPlaceholder)
+  const animatedPlaceholder = useAnimated(showAnimatedPlaceholder)
+
+  const trimmedQuery = query.trim()
+  const liveMatches = useMemo(
+    () => filterProductsByQuery(products, trimmedQuery),
+    [products, trimmedQuery],
+  )
+  const livePreview = liveMatches.slice(0, LIVE_SEARCH_LIMIT)
 
   useEffect(() => {
     setQuery(searchParams.get('q') || '')
   }, [searchParams, location.pathname])
 
+  useEffect(() => {
+    fetchProducts()
+      .then(setProducts)
+      .catch(() => setProducts([]))
+  }, [])
+
+  useEffect(() => {
+    if (!searchFocused) return
+
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setSearchFocused(false)
+    }
+
+    document.body.style.overflow = 'hidden'
+    window.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKeyDown)
+    }
+  }, [searchFocused])
+
   const handleSearch = (e) => {
     e.preventDefault()
-    const q = query.trim()
-    if (q) {
-      navigate(`/cua-hang?q=${encodeURIComponent(q)}`)
-    } else {
-      navigate('/cua-hang')
-    }
+    closeSearch()
+    if (trimmedQuery) navigate(`/cua-hang?q=${encodeURIComponent(trimmedQuery)}`)
+    else navigate('/cua-hang')
   }
+
+  const closeSearch = () => setSearchFocused(false)
 
   return (
     <>
+      {searchFocused && (
+        <button
+          type="button"
+          className="header-search-backdrop"
+          aria-label="Đóng tìm kiếm"
+          tabIndex={-1}
+          onMouseDown={(e) => {
+            e.preventDefault()
+            closeSearch()
+          }}
+        />
+      )}
+
       <header className="site-header">
         <div className="header-inner">
           <div className="header-main">
-          <Link to="/" className="header-logo">
-            <img
-              src="/images/logo.png"
-              alt="Casio Shop"
-              className="header-logo-img"
-            />
-          </Link>
+            <Link to="/" className="header-logo">
+              <img
+                src="/images/logo.png"
+                alt="Casio Shop"
+                className="header-logo-img"
+              />
+            </Link>
 
-          <div className="header-search-wrap">
-            <form className="header-search" onSubmit={handleSearch} role="search">
-              <label htmlFor="header-search-input" className="sr-only">
-                Tìm theo tên sản phẩm
-              </label>
-              <div className="header-search-field">
-                {showAnimatedPlaceholder && (
-                  <span className="header-search-animated" aria-hidden>
-                    {animatedPlaceholder}
-                    <span className="header-search-cursor">|</span>
-                  </span>
-                )}
-                <input
-                  id="header-search-input"
-                  type="search"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
-                  placeholder=""
-                  autoComplete="off"
-                />
-              </div>
-              <button
-                type="submit"
-                className="header-search-btn"
-                aria-label="Tìm kiếm"
+            <div
+              className={`header-search-wrap${searchFocused ? ' is-search-active' : ''}`}
+            >
+              <div className="header-search-shell">
+              <form
+                className="header-search"
+                onSubmit={handleSearch}
+                role="search"
               >
-                <svg
-                  className="header-search-icon"
-                  viewBox="0 0 24 24"
-                  width="20"
-                  height="20"
-                  aria-hidden
+                <label htmlFor="header-search-input" className="sr-only">
+                  Tìm theo tên sản phẩm
+                </label>
+                <div className="header-search-field">
+                  {showAnimatedPlaceholder && (
+                    <span className="header-search-animated" aria-hidden>
+                      {animatedPlaceholder}
+                      <span className="header-search-cursor">|</span>
+                    </span>
+                  )}
+                  <input
+                    id="header-search-input"
+                    type="search"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => {
+                      window.setTimeout(() => setSearchFocused(false), 120)
+                    }}
+                    placeholder=""
+                    autoComplete="off"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="header-search-btn"
+                  aria-label="Tìm kiếm"
                 >
-                  <circle
-                    cx="11"
-                    cy="11"
-                    r="7"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
+                  <img
+                    src="/images/icon/iconSearch.png"
+                    alt=""
+                    className="header-search-icon"
                   />
-                  <path
-                    d="M16 16l5 5"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-              </button>
-            </form>
-            <div className="header-search-hints">
-              <button
-                type="button"
-                className="header-search-hint"
-                onClick={() => navigate('/cua-hang?category=calculator')}
-              >
-                máy tính casio
-              </button>
-              <button
-                type="button"
-                className="header-search-hint"
-                onClick={() => navigate('/cua-hang?category=accessory')}
-              >
-                phụ kiện máy tính
-              </button>
-              <button
-                type="button"
-                className="header-search-hint"
-                onClick={() => navigate('/cua-hang?category=bag')}
-              >
-                balo học sinh
-              </button>
+                </button>
+              </form>
+
+              {searchFocused && (
+                <div
+                  className="header-search-panel"
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  {trimmedQuery ? (
+                    <>
+                      <div className="header-search-panel-head">
+                        Kết quả tìm kiếm cho{' '}
+                        <strong>&ldquo;{trimmedQuery}&rdquo;</strong>
+                      </div>
+                      {livePreview.length > 0 ? (
+                        <ul className="header-search-results">
+                          {livePreview.map((p) => (
+                            <li key={p.id}>
+                              <Link
+                                to={`/san-pham/${p.id}`}
+                                className="header-search-result"
+                                onClick={closeSearch}
+                              >
+                                <img
+                                  src={productImageSrc(p.image)}
+                                  alt=""
+                                  className="header-search-result-img"
+                                />
+                                <span className="header-search-result-info">
+                                  <span className="header-search-result-name">
+                                    {p.name}
+                                  </span>
+                                  <span className="header-search-result-price">
+                                    {formatPrice(p.price)}
+                                  </span>
+                                </span>
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="header-search-empty">
+                          Không tìm thấy sản phẩm phù hợp.
+                        </p>
+                      )}
+                      {liveMatches.length > 0 && (
+                        <Link
+                          to={`/cua-hang?q=${encodeURIComponent(trimmedQuery)}`}
+                          className="header-search-view-all"
+                          onClick={closeSearch}
+                        >
+                          Xem tất cả {liveMatches.length} kết quả
+                        </Link>
+                      )}
+                    </>
+                  ) : (
+                    <div className="header-search-hints">
+                      <button
+                        type="button"
+                        className="header-search-hint"
+                        onClick={() => {
+                          closeSearch()
+                          navigate('/cua-hang?category=may-tinh')
+                        }}
+                      >
+                        máy tính casio
+                      </button>
+                      <button
+                        type="button"
+                        className="header-search-hint"
+                        onClick={() => {
+                          closeSearch()
+                          navigate('/cua-hang?category=phu-kien')
+                        }}
+                      >
+                        phụ kiện máy tính
+                      </button>
+                      <button
+                        type="button"
+                        className="header-search-hint"
+                        onClick={() => {
+                          closeSearch()
+                          navigate('/cua-hang?category=balo')
+                        }}
+                      >
+                        balo học sinh
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+              </div>
             </div>
-          </div>
 
-          <a href="tel:19002152" className="header-support">
-            <img
-              src="/images/icon/iconGoi.png"
-              alt=""
-              className="header-support-icon"
-              width={40}
-              height={40}
-            />
-            <span className="header-support-text">
-              <span className="header-support-label">Hỗ trợ khách hàng</span>
-              <span className="header-support-phone">1900 2152</span>
-            </span>
-          </a>
+            <a href="tel:19002152" className="header-support">
+              <img
+                src="/images/icon/iconGoi.png"
+                alt=""
+                className="header-support-icon"
+                width={40}
+                height={40}
+              />
+              <span className="header-support-text">
+                <span className="header-support-label">Hỗ trợ khách hàng</span>
+                <span className="header-support-phone">0988 480 655</span>
+              </span>
+            </a>
 
-          <Link to="/#lien-he" className="header-account">
-            <span className="header-account-icon" aria-hidden>
-              <svg viewBox="0 0 24 24" width="28" height="28">
-                <circle cx="12" cy="8" r="4" fill="currentColor" />
-                <path
-                  d="M4 20c0-4 4-6 8-6s8 2 8 6"
-                  fill="currentColor"
-                />
-              </svg>
-            </span>
-            <span className="header-account-text">
-              <span className="header-account-label">Tài khoản</span>
-              <span className="header-account-action">Đăng nhập</span>
-            </span>
-          </Link>
-
-          <NavLink
-            to="/gio-hang"
-            className={({ isActive }) =>
-              `header-cart${isActive ? ' active' : ''}`
-            }
-          >
-            <img
-              src="/images/icon/iconGioHang.png"
-              alt=""
-              className="header-cart-icon"
-              width={32}
-              height={32}
-            />
-            <span className="header-cart-label">Giỏ hàng</span>
-            {totalItems > 0 && (
-              <span className="header-cart-badge">{totalItems}</span>
+            {isLoggedIn ? (
+              <div className="header-account">
+                {accountIcon}
+                <span className="header-account-text">
+                  <span className="header-account-label">Tài khoản</span>
+                  <span className="header-account-action">
+                    {booting ? '...' : `Hi, ${user.name.split(' ')[0]}`}
+                  </span>
+                  <Link to="/don-hang-cua-toi" className="header-account-orders">
+                    Đơn hàng của tôi
+                  </Link>
+                  {isAdmin && (
+                    <Link to="/admin" className="header-account-admin">
+                      Quản trị
+                    </Link>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  className="header-logout-btn"
+                  onClick={() => logout()}
+                >
+                  Thoát
+                </button>
+              </div>
+            ) : (
+              <Link to="/dang-nhap" className="header-account">
+                {accountIcon}
+                <span className="header-account-text">
+                  <span className="header-account-label">Tài khoản</span>
+                  <span className="header-account-action">Đăng nhập</span>
+                </span>
+              </Link>
             )}
-          </NavLink>
+
+            <NavLink
+              to="/gio-hang"
+              className={({ isActive }) =>
+                `header-cart${isActive ? ' active' : ''}`
+              }
+            >
+              <img
+                src="/images/icon/iconGioHang.png"
+                alt=""
+                className="header-cart-icon"
+                width={32}
+                height={32}
+              />
+              <span className="header-cart-label">Giỏ hàng</span>
+              {totalItems > 0 && (
+                <span className="header-cart-badge">{totalItems}</span>
+              )}
+            </NavLink>
           </div>
         </div>
       </header>
@@ -221,24 +358,13 @@ export default function Header() {
             />
             Trang chủ
           </NavLink>
-
-          <Link to="/#gioi-thieu" className="nav-link">
-            <img
-              src="/images/icon/iconGioiThieu.png"
-              alt=""
-              className="nav-link-icon nav-link-icon--clear"
-            />
-            Giới thiệu
-          </Link>
-
           <NavDropdown
             label="Sản phẩm"
             links={productLinks}
             icon="/images/icon/iconSanPham.png"
           />
-
           <NavLink
-            to="/cua-hang"
+            to="/tin-tuc"
             className={({ isActive }) =>
               isActive ? 'nav-link active' : 'nav-link'
             }
@@ -246,9 +372,17 @@ export default function Header() {
             <img
               src="/images/icon/iconTinTuc.png"
               alt=""
-              className="nav-link-icon nav-link-icon--clear"
+              className="nav-link-icon"
             />
             Tin tức
+          </NavLink>
+          <NavLink
+            to="/faq"
+            className={({ isActive }) =>
+              isActive ? 'nav-link active' : 'nav-link'
+            }
+          >
+            FAQ
           </NavLink>
         </div>
       </nav>

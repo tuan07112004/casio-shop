@@ -1,0 +1,129 @@
+﻿.admin-page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 40px 20px 64px;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  }
+  
+  .admin-card {
+    padding: 36px 32px;
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  }
+
+  .admin-card--wide {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+  
+  .admin-badge {
+    display: inline-block;
+    margin: 0 0 12px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #fff;
+    background: #3d4f2a;
+    border-radius: 999px;
+  }
+  
+  .admin-title {
+    margin: 0 0 12px;
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #1a1a1a;
+  }
+  
+  .admin-welcome {
+    margin: 0 0 8px;
+    font-size: 1rem;
+    color: #374151;
+  }
+  
+  .admin-desc {
+    margin: 0 0 24px;
+    font-size: 0.95rem;
+    line-height: 1.55;
+    color: rgba(0, 0, 0, 0.55);
+  }
+  
+  .admin-menu {
+    list-style: none;
+    margin: 0 0 28px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  
+  .admin-menu li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  }
+  
+  .admin-menu li:last-child {
+    border-bottom: none;
+  }
+  
+  .admin-menu-label {
+    font-weight: 600;
+    color: #111827;
+    text-decoration: none;
+  }
+
+  a.admin-menu-label:hover {
+    color: #2d4f2a;
+  }
+  
+  .admin-menu-arrow {
+    font-size: 1rem;
+    color: #94a3b8;
+  }
+  
+  .admin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    border-radius: 999px;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+  }
+  
+  .admin-btn--primary {
+    background: #1a1a1a;
+    color: #fff;
+  }
+  
+  .admin-btn--secondary {
+    background: transparent;
+    color: #1a1a1a;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+  }
+
+  .admin-route-loading {
+    min-height: 40vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  }

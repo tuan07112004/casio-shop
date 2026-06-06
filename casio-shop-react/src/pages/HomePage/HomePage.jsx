@@ -1,11 +1,11 @@
-import Info from '../../components/Info/Info'
+import CategoryShowcase from '../../components/CategoryShowcase/CategoryShowcase'
 import ProductShowcase from '../../components/ProductShowcase/ProductShowcase'
 import './HomePage.css'
 
 export default function HomePage() {
   return (
     <div className="home-page">
-      <Info />
+      <CategoryShowcase />
       <ProductShowcase />
     </div>
   )

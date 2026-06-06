@@ -1,0 +1,142 @@
+.my-orders {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 56px;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.my-orders-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.my-orders-sub {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.my-orders-loading,
+.my-orders-error {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.my-orders-error {
+  color: #b42318;
+}
+
+.my-orders-empty {
+  margin-top: 28px;
+  padding: 40px 24px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+}
+
+.my-orders-empty-hint {
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.my-orders-cta {
+  display: inline-block;
+  margin-top: 16px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.my-orders-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 28px;
+}
+
+.my-order-card {
+  padding: 20px 22px;
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.my-order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.my-order-id {
+  display: block;
+  font-size: 1.05rem;
+  color: #1a1a1a;
+}
+
+.my-order-date {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.my-order-badge {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.my-order-badge--pending { background: #fef3c7; color: #92400e; }
+.my-order-badge--confirmed { background: #dbeafe; color: #1e40af; }
+.my-order-badge--shipping { background: #e0e7ff; color: #3730a3; }
+.my-order-badge--completed { background: #dcfce7; color: #166534; }
+.my-order-badge--cancelled { background: #fee2e2; color: #991b1b; }
+
+.my-order-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.my-order-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  font-size: 0.92rem;
+}
+
+.my-order-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.my-order-footer strong {
+  font-size: 1.1rem;
+  color: #2d4f2a;
+}
+
+.my-order-address {
+  margin: 10px 0 0;
+  font-size: 0.85rem;
+  color: #64748b;
+  line-height: 1.5;
+}

@@ -1,0 +1,35 @@
+.logo-marquee {
+    overflow: hidden;
+    width: 100%;
+    margin-top: 0;
+    background: #e8f4fc;
+    padding: 10px 0;
+  }
+  
+  .logo-track {
+    display: flex;
+    align-items: center;
+    gap: 220px;
+    width: max-content;
+    animation: logoRun 80s linear infinite;
+  }
+  
+  .logo-marquee-img {
+    display: block;
+    height: 68px;
+    width: auto;
+    max-width: none;
+    object-fit: contain;
+    flex-shrink: 0;
+    user-select: none;
+    pointer-events: none;
+  }
+  
+  @keyframes logoRun {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }

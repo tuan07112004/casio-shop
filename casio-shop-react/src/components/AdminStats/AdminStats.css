@@ -1,0 +1,59 @@
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 768px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-stats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-stats-card {
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+}
+
+.admin-stats-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.admin-stats-value {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  line-height: 1.2;
+}
+
+.admin-stats-card--green .admin-stats-value {
+  color: #2d4f2a;
+}
+
+.admin-stats-card--teal .admin-stats-value {
+  color: #007a8c;
+}
+
+.admin-stats-card--amber .admin-stats-value {
+  color: #b45309;
+}
+
+.admin-stats-card--blue .admin-stats-value {
+  color: #1d4ed8;
+}

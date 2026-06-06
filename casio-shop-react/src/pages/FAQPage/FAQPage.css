@@ -1,0 +1,116 @@
+﻿.faq-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+}
+
+.faq-title {
+  margin: 0 0 40px;
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 400;
+  text-align: center;
+  color: #1a1a1a;
+  line-height: 1.35;
+}
+
+.faq-list {
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.faq-item {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.faq-question {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-display);
+  font-size: clamp(0.95rem, 1.8vw, 1.05rem);
+  font-weight: 400;
+  color: #1a1a1a;
+  line-height: 1.5;
+  transition: color 0.15s ease;
+}
+
+.faq-question:hover {
+  color: #2d4f2a;
+}
+
+.faq-question:focus-visible {
+  outline: 2px solid #6d7f3e;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.faq-question-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.faq-number {
+  margin-right: 0.35em;
+  font-weight: 400;
+}
+
+.faq-icon {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.45);
+  line-height: 1;
+  transition: transform 0.25s ease, color 0.15s ease;
+}
+
+.faq-item.is-open .faq-icon {
+  color: #2d4f2a;
+}
+
+.faq-answer-wrap {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.faq-item.is-open .faq-answer-wrap {
+  grid-template-rows: 1fr;
+}
+
+.faq-answer-inner {
+  overflow: hidden;
+}
+
+.faq-answer {
+  margin: 0;
+  padding: 0 0 20px;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: rgba(0, 0, 0, 0.62);
+}
+
+@media (max-width: 540px) {
+  .faq-page {
+    padding: 36px 16px 64px;
+  }
+
+  .faq-question {
+    gap: 12px;
+    padding: 16px 0;
+  }
+}
+

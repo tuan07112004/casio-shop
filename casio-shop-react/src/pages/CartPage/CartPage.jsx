@@ -1,80 +1,105 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../../context/CartContext'
-import { formatPrice } from '../../utils/format'
-import Button from '../../components/Button/Button'
+import { formatPrice, productImageSrc } from '../../utils/format'
 import './CartPage.css'
 
 export default function CartPage() {
-  const { items, removeFromCart, updateQuantity, totalPrice } = useCart()
+  const { items, removeFromCart, updateQuantity, totalPrice, clearCart } =
+    useCart()
 
   if (items.length === 0) {
     return (
       <div className="cart-page">
-        <h1>Giỏ hàng</h1>
-        <p className="cart-empty">Giỏ trống — hãy chọn sản phẩm nhé.</p>
-        <Button content="Mua sắm ngay" to="/cua-hang" />
+        <h1 className="cart-title">Giỏ hàng</h1>
+        <div className="cart-empty">
+          <p>Giỏ hàng đang trống.</p>
+          <Link to="/cua-hang" className="cart-cta">
+            Mua sắm ngay
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
     <div className="cart-page">
-      <h1>Giỏ hàng</h1>
+      <header className="cart-header">
+        <h1 className="cart-title">Giỏ hàng</h1>
+        <button type="button" className="cart-clear" onClick={clearCart}>
+          Xóa tất cả
+        </button>
+      </header>
 
       <ul className="cart-list">
         {items.map((item) => (
           <li key={item.productId} className="cart-item">
-            <img src={item.image} alt={item.name} width={96} height={96} />
-            <div className="cart-item-info">
-              <h3>
-                <Link to={`/san-pham/${item.productId}`}>{item.name}</Link>
-              </h3>
+            <Link
+              to={`/san-pham/${item.productId}`}
+              className="cart-item-thumb"
+            >
+              <img src={productImageSrc(item.image)} alt={item.name} />
+            </Link>
+
+            <div className="cart-item-body">
+              <Link
+                to={`/san-pham/${item.productId}`}
+                className="cart-item-name"
+              >
+                {item.name}
+              </Link>
               <p className="cart-item-price">{formatPrice(item.price)}</p>
-              <div className="cart-qty">
+
+              <div className="cart-item-qty">
                 <button
                   type="button"
-                  aria-label="Giảm số lượng"
+                  className="qty-btn"
                   onClick={() =>
                     updateQuantity(item.productId, item.quantity - 1)
                   }
+                  aria-label="Giảm"
                 >
                   −
                 </button>
-                <span>{item.quantity}</span>
+                <span className="qty-value">{item.quantity}</span>
                 <button
                   type="button"
-                  aria-label="Tăng số lượng"
+                  className="qty-btn"
                   onClick={() =>
                     updateQuantity(item.productId, item.quantity + 1)
                   }
+                  aria-label="Tăng"
                 >
                   +
                 </button>
               </div>
             </div>
-            <p className="cart-item-subtotal">
-              {formatPrice(item.price * item.quantity)}
-            </p>
-            <button
-              type="button"
-              className="cart-remove"
-              onClick={() => removeFromCart(item.productId)}
-            >
-              Xóa
-            </button>
+
+            <div className="cart-item-side">
+              <p className="cart-item-line-total">
+                {formatPrice(item.price * item.quantity)}
+              </p>
+              <button
+                type="button"
+                className="cart-item-remove"
+                onClick={() => removeFromCart(item.productId)}
+              >
+                Xóa
+              </button>
+            </div>
           </li>
         ))}
       </ul>
 
-      <div className="cart-summary">
-        <p className="cart-total">
-          Tổng cộng: <strong>{formatPrice(totalPrice)}</strong>
-        </p>
-        <p className="cart-note">
-          Thanh toán trực tuyến sẽ được bổ sung ở bước đặt hàng qua API.
-        </p>
-        <Button content="Tiếp tục mua sắm" to="/cua-hang" />
-      </div>
+      <footer className="cart-footer">
+        <p className="cart-total-label">Tổng cộng</p>
+        <p className="cart-total-value">{formatPrice(totalPrice)}</p>
+        <Link to="/thanh-toan" className="cart-cta">
+  Thanh toán
+</Link>
+<Link to="/cua-hang" className="cart-cta cart-cta--secondary">
+  Tiếp tục mua
+</Link>
+      </footer>
     </div>
   )
 }
