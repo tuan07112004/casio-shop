@@ -56,12 +56,14 @@ class ProductController extends Controller
 
     public function uploadImage(Request $request): JsonResponse
     {
-        $request->validate([
+        $validated = $request->validate([
             'image' => ['required', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'category' => ['sometimes', 'string', 'in:'.implode(',', self::CATEGORIES)],
         ]);
 
+        $category = $validated['category'] ?? 'phu-kien';
         $file = $request->file('image');
-        $dir = $this->uploadDir();
+        $dir = $this->uploadDir($category);
 
         $base = Str::slug(pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME));
         $base = $base !== '' ? $base : 'san-pham';
@@ -71,13 +73,13 @@ class ProductController extends Controller
 
         return response()->json([
             'message' => 'Tải ảnh thành công.',
-            'path' => '/images/sanpham/'.$filename,
+            'path' => '/images/products/'.$category.'/'.$filename,
         ]);
     }
 
-    private function uploadDir(): string
+    private function uploadDir(string $category): string
     {
-        $dir = base_path('../casio-shop-react/public/images/sanpham');
+        $dir = base_path('../casio-shop-react/public/images/products/'.$category);
 
         if (! is_dir($dir)) {
             mkdir($dir, 0755, true);
@@ -86,7 +88,7 @@ class ProductController extends Controller
         return $dir;
     }
 
-    /** @return array<string, list<string|\Illuminate\Validation\Rules\In>> */
+    /** @return array<string, mixed> */
     private function rules(): array
     {
         return [
@@ -94,6 +96,17 @@ class ProductController extends Controller
             'price' => ['required', 'integer', 'min:1000', 'max:999999999'],
             'image' => ['required', 'string', 'max:500'],
             'category' => ['required', 'string', 'in:'.implode(',', self::CATEGORIES)],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'hover_image' => ['nullable', 'string', 'max:500'],
+            'price_like_new' => ['nullable', 'integer', 'min:1000', 'max:999999999'],
+            'price_85' => ['nullable', 'integer', 'min:1000', 'max:999999999'],
+            'price_70' => ['nullable', 'integer', 'min:1000', 'max:999999999'],
+            'price_55' => ['nullable', 'integer', 'min:1000', 'max:999999999'],
+            'colors' => ['nullable', 'array', 'max:6'],
+            'colors.*.hex' => ['required_with:colors', 'string', 'max:20'],
+            'colors.*.label' => ['required_with:colors', 'string', 'max:50'],
+            'gallery_main_image' => ['nullable', 'string', 'max:500'],
+            'gallery_video' => ['nullable', 'string', 'max:500'],
         ];
     }
 }

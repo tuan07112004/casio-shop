@@ -95,3 +95,28 @@ export async function apiUpdateOrderStatus(token, orderId, status) {
   const data = await parseJson(res)
   return mapApiOrder(data.order)
 }
+
+/** Tra cứu theo SĐT — không cần token */
+export async function apiLookupOrdersByPhone(phone) {
+  const params = new URLSearchParams({ phone: phone.trim() })
+  const res = await fetch(`${API}/api/orders/lookup?${params}`, {
+    headers: { Accept: 'application/json' },
+  })
+  const data = await parseJson(res)
+  return data.orders.map(mapApiOrder)
+}
+
+/** Admin — cập nhật trạng thái thanh toán */
+export async function apiUpdatePaymentStatus(token, orderId, paymentStatus) {
+  const res = await fetch(`${API}/api/orders/${orderId}/payment-status`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ payment_status: paymentStatus }),
+  })
+  const data = await parseJson(res)
+  return mapApiOrder(data.order)
+}

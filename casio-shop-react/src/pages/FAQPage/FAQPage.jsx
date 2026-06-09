@@ -18,7 +18,7 @@ const FAQ_ITEMS = [
     id: 3,
     question: 'Tôi kiểm tra đơn hàng và vận chuyển ở đâu?',
     answer:
-      'Sau khi đặt hàng, bạn nhận email hoặc tin nhắn xác nhận kèm mã vận đơn (nếu có). Bạn có thể liên hệ hotline 0988 480 655 để được hỗ trợ tra cứu.',
+      'Sau khi đặt hàng, bạn nhận mã đơn trên màn hình xác nhận. Tra cứu tại mục Tra cứu đơn hàng (nhập số điện thoại đã đặt) hoặc gọi hotline 0988 480 655.',
   },
   {
     id: 4,

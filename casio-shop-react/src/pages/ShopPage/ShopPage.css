@@ -61,3 +61,7 @@
   text-decoration: underline;
 }
 
+.shop-page .product-showcase-grid--shop {
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+

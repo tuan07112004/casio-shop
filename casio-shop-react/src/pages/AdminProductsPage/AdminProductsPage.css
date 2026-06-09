@@ -1,5 +1,5 @@
 .admin-products {
-  max-width: 960px;
+  max-width: 1080px;
   margin: 0 auto;
   padding: 24px 20px 48px;
   font-family: 'Be Vietnam Pro', system-ui, sans-serif;
@@ -46,7 +46,8 @@
 }
 
 .admin-products-form input,
-.admin-products-form select {
+.admin-products-form select,
+.admin-products-form textarea {
   display: block;
   width: 100%;
   margin-top: 6px;
@@ -55,6 +56,90 @@
   border-radius: 8px;
   font: inherit;
   box-sizing: border-box;
+}
+
+.admin-products-form textarea {
+  resize: vertical;
+  min-height: 96px;
+  line-height: 1.5;
+}
+
+.admin-products-fieldset {
+  margin: 0 0 22px;
+  padding: 18px 18px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  background: #fafaf8;
+}
+
+.admin-products-fieldset legend {
+  padding: 0 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #374151;
+}
+
+.admin-products-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.admin-products-grid--4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin-products-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.admin-products-color-opt {
+  position: relative;
+  display: block;
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  padding: 4px;
+  border: 2px solid #dcdcdc;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.admin-products-color-opt--active {
+  border-color: #3a5c38;
+  box-shadow: 0 0 0 1px #3a5c38;
+}
+
+.admin-products-color-check {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  margin: 0;
+  pointer-events: none;
+}
+
+.admin-products-color-swatch {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+@media (max-width: 800px) {
+  .admin-products-grid,
+  .admin-products-grid--4 {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-products-upload {

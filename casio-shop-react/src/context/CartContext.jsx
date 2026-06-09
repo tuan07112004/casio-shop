@@ -1,17 +1,16 @@
 import {createContext, useContext, useMemo, useState} from 'react'
-// createContext: tạo kho dữ liệu dùng chung 
-// useContext: lấy dữ liệu từ kho đó ra dùng 
-// useMemo: ghi nhớ két quả tính toán, tránh tính lại không cần thiết
-// useState: tạo state, tức dữ liệu có thể thay đổi
+// createContext: tạo kho 
+// useContext: đọc kho 
+// useMemo: ghi nhớ két quả tính toán
 
-const CartContext = createContext(null) // tạo kho hàng chưa có dữ liệu gì 
-const STORAGE_KEY = 'casio-shop-cart'       // để tên lưu giỏ hàng trong trình duyệt
+const CartContext = createContext(null) // tạo kho hàng 
+const STORAGE_KEY = 'casio-shop-cart'       // để tên localStorage
 
 // hàm lấy giỏ hàng từ local storage
 function loadCart() {
     try {
-        const raw = localStorage.getItem(STORAGE_KEY)   // lấy dữ liệu từ localStorage 
-         return raw ? JSON.parse(raw) : []  // nếu có dữ liệu đổi chuỗi JSON thành mảng JavaScript
+        const raw = localStorage.getItem(STORAGE_KEY)   
+         return raw ? JSON.parse(raw) : []  // có chuỗi chuyển thành mảng 
     } catch {
         return []
     }
@@ -19,21 +18,21 @@ function loadCart() {
 
 // hàm lưu giỏ hàng vào local storage
 function saveCart(items) {
-     localStorage.setItem(STORAGE_KEY, JSON.stringify(items))  // lưu chuỗi items vào localStorage
+     localStorage.setItem(STORAGE_KEY, JSON.stringify(items)) 
 }
 
-
-export function CartProvider({children})  // tạo kho hàng giỏ hàng và cung cấp dữ liệu cho các component con
+// tạo kho và giỏ hàng cũng cấp dữ liệu cho các component con 
+export function CartProvider({children})  
 {
-    const [items, setItems] = useState(loadCart) // mở web react sẽ gọi loadCart để lấy giỏ hàng cũ từ localStorage
+    const [items, setItems] = useState(loadCart) //  gọi loadCart để lấy giỏ hàng cũ từ localStorage
 
-    // tạo hàm cập nhật giỏ hàng thay vì mỗi lần setItems tâ gom về 1 hàm để sau khi cập nhật thì tự lưu vào localStorage
+    // tạo hàm cập nhật giỏ hàng, sau khi cập nhật thì tự lưu vào localStorage
     const updateItems = (updater) => {
 
-        // cập nhật state dựa trên giỏ hàng cũ, prev là giỏ hàng hiện tại trước khi thay đổi
+        // cập nhật state dựa trên giỏ hàng cũ(prev)
         setItems((prev) => {
-            // nếu updater là hàm thì -> chạy updater(prev) để tạo giỏ hàng mới
-            // không phải -> lấy luôn updater làm giỏ hàng mới 
+            // nếu updater là hàm -> tính từ giỏ cũ 
+            // không hàm -> lấy luôn updater làm giỏ hàng mới 
             const next = typeof updater === 'function' ? updater(prev) : updater
             
             saveCart(next)  // lưu giỏ hàng mới vào localStorage
@@ -41,14 +40,13 @@ export function CartProvider({children})  // tạo kho hàng giỏ hàng và cun
         })
     }
 
-    // product: sản phẩm cần thêm, quantity: số lượng cần thêm
+    // 1: sản phẩm cần thêm, 2: số lượng cần thêm
     const addToCart = (product, quantity = 1) => {
         // cập nhật giỏ hàng dựa trên giỏ hàng cũ 
         updateItems((prev) => {
             // tìm kiếm sản phẩm này có trong giỏ chưa, nếu có thì found là sản phẩm đó 
             const found = prev.find((item) => item.productId === product.id)
 
-            // nếu sp tồn tại thì thêm còn không thì tạo mới 
             if(found) {
 
                 return prev.map((item) => // duyệt qua từng sp trong giỏ để tạo mảng mới 
@@ -88,8 +86,7 @@ export function CartProvider({children})  // tạo kho hàng giỏ hàng và cun
         )
     }
 
-    const clearCart = () => updateItems([])  // xóa tất cả sp trong giỏ 
-
+    const clearCart = () => updateItems([])  
 
     const totalItems = useMemo(() => 
     items.reduce((sum, item) => sum + item.quantity, 0),

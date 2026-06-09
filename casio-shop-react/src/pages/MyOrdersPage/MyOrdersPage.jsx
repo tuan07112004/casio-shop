@@ -3,15 +3,17 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { apiFetchMyOrders } from '../../api/orders'
 import { formatPrice } from '../../utils/format'
+import { buildVietQrUrl } from '../../config/payment'
 import {
   ORDER_STATUS_LABEL,
   PAYMENT_METHOD_LABEL,
+  PAYMENT_STATUS_LABEL,
   formatOrderDate,
 } from '../../utils/orderLabels'
 import './MyOrdersPage.css'
 
 export default function MyOrdersPage() {
-  const { token, user } = useAuth()
+  const { token } = useAuth()
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -41,10 +43,18 @@ export default function MyOrdersPage() {
 
   return (
     <div className="my-orders">
+      <nav className="account-breadcrumb" aria-label="Breadcrumb">
+        <Link to="/">Trang chủ</Link>
+        <span aria-hidden>/</span>
+        <Link to="/tai-khoan">Tài khoản</Link>
+        <span aria-hidden>/</span>
+        <span>Đơn hàng của tôi</span>
+      </nav>
+
       <header className="my-orders-header">
         <h1 className="my-orders-title">Đơn hàng của tôi</h1>
         <p className="my-orders-sub">
-          Xin chào <strong>{user?.name}</strong> — các đơn bạn đặt khi đã đăng nhập.
+          Các đơn bạn đặt khi đã đăng nhập.
         </p>
       </header>
 
@@ -84,9 +94,28 @@ export default function MyOrdersPage() {
               <footer className="my-order-footer">
                 <span>
                   {PAYMENT_METHOD_LABEL[order.paymentMethod] || order.paymentMethod}
+                  {' · '}
+                  <span
+                    className={`my-order-pay-badge my-order-pay-badge--${order.paymentStatus}`}
+                  >
+                    {PAYMENT_STATUS_LABEL[order.paymentStatus] || order.paymentStatus}
+                  </span>
                 </span>
                 <strong>{formatPrice(order.totalAmount)}</strong>
               </footer>
+
+              {order.paymentMethod === 'bank_transfer' &&
+                order.paymentStatus === 'unpaid' && (
+                  <div className="my-order-qr">
+                    <p className="my-order-qr-label">Quét mã để chuyển khoản:</p>
+                    <img
+                      src={buildVietQrUrl(order.id, order.totalAmount)}
+                      alt="QR chuyển khoản"
+                      width={180}
+                      height={180}
+                    />
+                  </div>
+                )}
 
               <p className="my-order-address">
                 Giao đến: {order.guestAddress}

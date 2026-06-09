@@ -1,0 +1,226 @@
+.account-overview {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.account-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.account-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.account-breadcrumb a:hover {
+  color: #2d4f2a;
+}
+
+.account-overview-head {
+  margin-bottom: 24px;
+}
+
+.account-overview-title {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 400;
+  color: #1a1a1a;
+}
+
+.account-overview-greet {
+  margin: 0;
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.55);
+}
+
+.account-overview-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 640px) {
+  .account-overview-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.account-stat-card,
+.account-quick-card {
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 14px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.account-quick-card:hover {
+  border-color: rgba(45, 79, 42, 0.25);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.account-stat-value {
+  display: block;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d4f2a;
+  line-height: 1.2;
+}
+
+.account-stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.account-quick-title {
+  display: block;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+.account-quick-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.account-recent {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  padding: 22px 24px;
+}
+
+.account-recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.account-recent-head h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.account-recent-all {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #2d4f2a;
+  text-decoration: none;
+}
+
+.account-recent-all:hover {
+  text-decoration: underline;
+}
+
+.account-recent-loading,
+.account-recent-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: #6b7280;
+}
+
+.account-recent-cta {
+  display: inline-block;
+  margin-top: 12px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.account-recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.account-recent-card {
+  padding: 16px 18px;
+  background: #fafafa;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 12px;
+}
+
+.account-recent-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.account-recent-card-top strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.account-recent-card-top time {
+  display: block;
+  margin-top: 2px;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
+.account-recent-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.account-recent-badge--pending { background: #fef3c7; color: #92400e; }
+.account-recent-badge--confirmed { background: #dbeafe; color: #1e40af; }
+.account-recent-badge--shipping { background: #e0e7ff; color: #3730a3; }
+.account-recent-badge--completed { background: #dcfce7; color: #166534; }
+.account-recent-badge--cancelled { background: #fee2e2; color: #991b1b; }
+
+.account-recent-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.account-recent-items li {
+  padding: 4px 0;
+}
+
+.account-recent-more {
+  font-style: italic;
+  color: #94a3b8;
+}
+
+.account-recent-foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.account-recent-foot strong {
+  color: #2d4f2a;
+  font-size: 1rem;
+}

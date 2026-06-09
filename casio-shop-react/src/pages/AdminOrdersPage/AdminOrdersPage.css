@@ -205,3 +205,45 @@
   min-width: 160px;
   background: #fff;
 }
+
+.admin-order-pay-badge {
+  display: inline-block;
+  width: fit-content;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-order-pay-badge--unpaid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-order-pay-badge--paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-order-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.admin-order-confirm-pay {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  background: #2d4f2a;
+  color: #fff;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-order-confirm-pay:hover {
+  background: #243f22;
+}

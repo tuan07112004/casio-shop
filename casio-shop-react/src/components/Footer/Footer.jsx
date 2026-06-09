@@ -40,6 +40,7 @@ export default function Footer() {
             <nav className="footer-nav">
               <Link to="/">Trang chủ</Link>
               <Link to="/gio-hang">Giỏ hàng</Link>
+              <Link to="/tra-cuu-don">Tra cứu đơn hàng</Link>
               <Link to="/faq">FAQ</Link>
               <a href="tel:19002152">Hotline: 1900 2152</a>
               <a href="mailto:lytuscasio@gmail.com">lytuscasio@gmail.com</a>

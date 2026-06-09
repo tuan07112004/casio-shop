@@ -1,0 +1,366 @@
+.order-lookup {
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.order-lookup--standalone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 56px 20px 72px;
+}
+
+.order-lookup--account {
+  padding: 0;
+}
+
+.order-lookup-hero {
+  width: 100%;
+}
+
+.order-lookup--standalone .order-lookup-hero {
+  width: min(440px, 100%);
+  text-align: center;
+}
+
+.order-lookup--account .order-lookup-hero {
+  max-width: 480px;
+}
+
+.order-lookup .account-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-align: left;
+}
+
+.order-lookup .account-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.order-lookup .account-breadcrumb a:hover {
+  color: #2d4f2a;
+}
+
+.order-lookup-title {
+  margin: 0 0 10px;
+  font-family: inherit;
+  font-size: clamp(1.45rem, 3vw, 1.85rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: #1a1a1a;
+}
+
+.order-lookup-lead {
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.55;
+}
+
+.order-lookup-lead strong {
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.order-lookup-form {
+  padding: 28px 26px 26px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 20px;
+  box-shadow: 0 10px 36px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+
+.order-lookup-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.45);
+}
+
+.order-lookup-input {
+  display: block;
+  width: 100%;
+  margin-bottom: 16px;
+  padding: 13px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 12px;
+  font: inherit;
+  font-size: 1rem;
+  color: #1a1a1a;
+  background: var(--page-bg, #f5f0e6);
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.order-lookup-input::placeholder {
+  color: rgba(0, 0, 0, 0.32);
+}
+
+.order-lookup-input:focus {
+  outline: none;
+  border-color: #5f6f52;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(95, 111, 82, 0.15);
+}
+
+.order-lookup-error {
+  margin: -4px 0 14px;
+  font-size: 0.88rem;
+  color: #b42318;
+}
+
+.order-lookup-submit {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  border-radius: 999px;
+  background: #5f6f52;
+  color: #fff;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.order-lookup-submit:hover:not(:disabled) {
+  background: #4f5d44;
+}
+
+.order-lookup-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.order-lookup-help {
+  margin: 22px 0 0;
+  font-size: 0.88rem;
+  color: rgba(0, 0, 0, 0.48);
+  line-height: 1.5;
+}
+
+.order-lookup-help a {
+  color: #3a5c38;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.order-lookup-help a:hover {
+  text-decoration: underline;
+}
+
+.order-lookup-results {
+  width: 100%;
+  margin-top: 36px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.order-lookup--standalone .order-lookup-results {
+  width: min(720px, 100%);
+}
+
+.order-lookup-count {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.order-lookup-result {
+  padding: 22px 24px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  border-radius: 16px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.04);
+}
+
+.order-lookup-result-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.order-lookup-result-head h2 {
+  margin: 0 0 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+.order-lookup-result-head time {
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.order-lookup-badges {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.order-lookup-badge,
+.order-lookup-pay-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.order-lookup-badge--pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.order-lookup-badge--confirmed,
+.order-lookup-badge--shipping {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.order-lookup-badge--completed {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.order-lookup-badge--cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.order-lookup-pay-badge--unpaid {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.order-lookup-pay-badge--paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.order-lookup-customer,
+.order-lookup-address,
+.order-lookup-payment {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.order-lookup-items {
+  list-style: none;
+  margin: 16px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.order-lookup-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 0.9rem;
+}
+
+.order-lookup-total {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+  text-align: right;
+}
+
+.order-lookup-bank {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.order-lookup-bank h3 {
+  margin: 0 0 12px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.order-lookup-qr {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.order-lookup-qr img {
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.order-lookup-bank-details {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.order-lookup-bank-details div {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.order-lookup-bank-details dt {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.order-lookup-bank-details dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.order-lookup-paid-note {
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  background: #dcfce7;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #166534;
+}
+
+@media (max-width: 540px) {
+  .order-lookup--standalone {
+    padding: 36px 16px 56px;
+  }
+
+  .order-lookup-form {
+    padding: 22px 18px 20px;
+  }
+
+  .order-lookup-result {
+    padding: 18px 16px;
+  }
+
+  .order-lookup-result-head {
+    flex-direction: column;
+  }
+
+  .order-lookup-badges {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .order-lookup-bank-details div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

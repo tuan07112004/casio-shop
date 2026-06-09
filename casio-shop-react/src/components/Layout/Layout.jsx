@@ -6,18 +6,21 @@ import './Layout.css'
 import LogoMarquee from '../LogoMarquee/LogoMarquee'
 
 export default function Layout() {
-  const isHome = useLocation().pathname === '/'
+  const { pathname } = useLocation()
+  const isHome = pathname === '/'
+  const isAccount =
+    pathname.startsWith('/tai-khoan') || pathname === '/tra-cuu-don'
 
   return (
-    <div className="layout">
+    <div className={`layout${isAccount ? ' layout--account' : ''}`}>
       <Header />
       {isHome && <Banner />}
-      <main className="layout-main">
+      <main className={`layout-main${isAccount ? ' layout-main--account' : ''}`}>
         <Outlet />
       </main>
       {isHome && <LogoMarquee />}
 
-      <Footer />
+      {!isAccount && <Footer />}
     </div>
   )
 }

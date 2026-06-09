@@ -20,9 +20,10 @@ function authHeaders(token, json = false) {
   return headers
 }
 
-export async function apiAdminUploadImage(token, file) {
+export async function apiAdminUploadImage(token, file, category = 'phu-kien') {
   const body = new FormData()
   body.append('image', file)
+  body.append('category', category)
 
   const res = await fetch(`${API}/api/products/upload-image`, {
     method: 'POST',

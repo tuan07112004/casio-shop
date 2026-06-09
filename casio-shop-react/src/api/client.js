@@ -9,7 +9,21 @@ export function mapApiProduct(row) {
     name: row.name,
     price: row.price,
     image: productImageSrc(row.image),
+    imagePath: row.image,
     category: row.category,
+    description: row.description || '',
+    hoverImage: row.hover_image ? productImageSrc(row.hover_image) : '',
+    hoverImagePath: row.hover_image || '',
+    priceLikeNew: row.price_like_new ?? null,
+    price85: row.price_85 ?? null,
+    price70: row.price_70 ?? null,
+    price55: row.price_55 ?? null,
+    colors: Array.isArray(row.colors) ? row.colors : null,
+    galleryMainImage: row.gallery_main_image
+      ? productImageSrc(row.gallery_main_image)
+      : '',
+    galleryMainImagePath: row.gallery_main_image || '',
+    galleryVideo: row.gallery_video || '',
   }
 }
 

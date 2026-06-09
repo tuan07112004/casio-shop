@@ -127,6 +127,52 @@ class OrderController extends Controller
         ]);
     }
 
+    /** Guest tra cứu — mã đơn + SĐT phải khớp */
+    public function lookup(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'phone' => ['required', 'string', 'regex:/^0\d{8,10}$/'],
+        ]);
+
+        $phone = trim($data['phone']);
+
+        $orders = Order::with('items')
+            ->where('guest_phone', $phone)
+            ->orderByDesc('id')
+            ->limit(50)
+            ->get()
+            ->map(fn ($o) => $this->orderPayload($o));
+
+        if ($orders->isEmpty()) {
+            return response()->json([
+                'message' => 'Không tìm thấy đơn hàng với số điện thoại này.',
+            ], 404);
+        }
+
+        return response()->json(['orders' => $orders->values()]);
+    }
+
+    /** Admin — xác nhận đã thanh toán chuyển khoản */
+    public function updatePaymentStatus(Request $request, Order $order): JsonResponse
+    {
+        $data = $request->validate([
+            'payment_status' => ['required', 'in:unpaid,paid'],
+        ]);
+
+        if ($order->payment_method !== 'bank_transfer' && $data['payment_status'] === 'paid') {
+            return response()->json([
+                'message' => 'Chỉ đơn chuyển khoản mới cập nhật trạng thái thanh toán.',
+            ], 422);
+        }
+
+        $order->update(['payment_status' => $data['payment_status']]);
+
+        return response()->json([
+            'message' => 'Cập nhật thanh toán thành công.',
+            'order' => $this->orderPayload($order->load('items')),
+        ]);
+    }
+
     /** Admin — đổi trạng thái */
     public function updateStatus(Request $request, Order $order): JsonResponse
     {

@@ -4,7 +4,8 @@ import { Link, useSearchParams } from 'react-router-dom'
 
 import { fetchProducts, filterProductsByQuery } from '../../api/client'
 
-import { formatPrice, productImageSrc } from '../../utils/format'
+import ProductCard from '../../components/ProductCard/ProductCard'
+import { sortMayTinh } from '../../utils/productCard'
 
 import '../../components/ProductShowcase/ProductShowcase.css'
 
@@ -52,71 +53,9 @@ function normalizeCategory(raw) {
 
 
 
-function getOriginalPrice(price) {
+function productCategoryKey(category) {
 
-  return Math.ceil((price * 1.15) / 1000) * 1000
-
-}
-
-
-
-function ShopProductCard({ product }) {
-
-  const cat = product.category || 'phu-kien'
-
-  const originalPrice = getOriginalPrice(product.price)
-
-
-
-  return (
-
-    <li className="product-showcase-card">
-
-      <Link to={`/san-pham/${product.id}`} className="product-showcase-link">
-
-        <div className={`product-showcase-visual product-showcase-visual--${cat}`}>
-
-          <img
-
-            className="product-showcase-img"
-
-            src={productImageSrc(product.image)}
-
-            alt={product.name}
-
-            loading="lazy"
-
-          />
-
-        </div>
-
-        <div className="product-showcase-body">
-
-          <h3 className="product-showcase-name">{product.name}</h3>
-
-          <div className="product-showcase-prices">
-
-            <span className="product-showcase-price-original">
-
-              {formatPrice(originalPrice)}
-
-            </span>
-
-            <span className="product-showcase-price-sale">
-
-              {formatPrice(product.price)}
-
-            </span>
-
-          </div>
-
-        </div>
-
-      </Link>
-
-    </li>
-
-  )
+  return CATEGORY_ALIASES[category?.toLowerCase()] || category || ''
 
 }
 
@@ -200,7 +139,7 @@ export default function ShopPage() {
 
     if (categoryFilter) {
 
-      list = list.filter((p) => p.category === categoryFilter)
+      list = list.filter((p) => productCategoryKey(p.category) === categoryFilter)
 
     }
 
@@ -222,7 +161,9 @@ export default function ShopPage() {
 
     for (const p of filtered) {
 
-      if (map[p.category]) map[p.category].push(p)
+      const key = productCategoryKey(p.category)
+
+      if (map[key]) map[key].push(p)
 
     }
 
@@ -253,6 +194,18 @@ export default function ShopPage() {
     return SHOP_SECTIONS.find((s) => s.key === categoryFilter)?.title || 'Cửa hàng'
 
   }, [categoryFilter])
+
+
+
+  const displayList = useMemo(() => {
+
+    if (!categoryFilter && !q) return null
+
+    if (categoryFilter === 'may-tinh') return sortMayTinh(filtered)
+
+    return filtered
+
+  }, [filtered, categoryFilter, q])
 
 
 
@@ -362,53 +315,65 @@ export default function ShopPage() {
 
 
 
-      {activeSections.map((section) => {
+      {displayList ? (
 
-        const list = grouped[section.key]
+        <section className="product-showcase-section">
 
-        if (!list?.length) return null
+          <ul className="product-showcase-grid product-showcase-grid--shop">
+
+            {displayList.map((p) => (
+
+              <ProductCard key={p.id} product={p} />
+
+            ))}
+
+          </ul>
+
+        </section>
+
+      ) : (
+
+        activeSections.map((section) => {
+
+          const list = grouped[section.key]
+
+          if (!list?.length) return null
 
 
 
-        const showSectionTitle = !categoryFilter && !q
+          return (
 
+            <section
 
+              key={section.key}
 
-        return (
+              className="product-showcase-section"
 
-          <section
+              aria-labelledby={`shop-section-${section.key}`}
 
-            key={section.key}
-
-            className="product-showcase-section"
-
-            aria-labelledby={`shop-section-${section.key}`}
-
-          >
-
-            {showSectionTitle && (
+            >
 
               <SectionTitle id={`shop-section-${section.key}`} title={section.title} />
 
-            )}
 
 
+              <ul className="product-showcase-grid product-showcase-grid--shop">
 
-            <ul className="product-showcase-grid">
+                {(section.key === 'may-tinh' ? sortMayTinh(list) : list).map((p) => (
 
-              {list.map((p) => (
+                  <ProductCard key={p.id} product={p} />
 
-                <ShopProductCard key={p.id} product={p} />
+                ))}
 
-              ))}
+              </ul>
 
-            </ul>
+            </section>
 
-          </section>
+          )
 
-        )
+        })
 
-      })}
+      )}
 
     </div>
 

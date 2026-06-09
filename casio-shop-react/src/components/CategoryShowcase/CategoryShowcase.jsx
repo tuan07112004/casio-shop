@@ -4,17 +4,17 @@ import './CategoryShowcase.css'
 const categories = [
   {
     title: 'Máy tính',
-    image: '/images/MaytinhRemove.png',
+    image: '/images/categories/may-tinh.png',
     to: '/cua-hang?category=calculator',
   },
   {
     title: 'Đô dùng học tập',
-    image: '/images/phukienRemove.png',
+    image: '/images/categories/phu-kien.png',
     to: '/cua-hang?category=accessory',
   },
   {
     title: 'Balo thời trang',
-    image: '/images/baloRmove.png',
+    image: '/images/categories/balo.png',
     to: '/cua-hang?category=bag',
   },
 ]

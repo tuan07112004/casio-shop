@@ -33,6 +33,7 @@ export default function CartPage() {
       <ul className="cart-list">
         {items.map((item) => (
           <li key={item.productId} className="cart-item">
+            
             <Link
               to={`/san-pham/${item.productId}`}
               className="cart-item-thumb"

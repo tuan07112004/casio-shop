@@ -1,0 +1,141 @@
+.account-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 28px;
+  align-items: start;
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.account-sidebar {
+  position: sticky;
+  top: 20px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.account-user-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 18px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(180deg, #fafafa 0%, #fff 100%);
+}
+
+.account-user-avatar {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2d4f2a, #4a7c43);
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.account-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.account-user-info strong {
+  font-size: 0.95rem;
+  color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-user-info span {
+  font-size: 0.78rem;
+  color: #6b7280;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.account-nav {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 8px;
+}
+
+.account-nav-link {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.account-nav-link:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.account-nav-link.active {
+  background: #eef6ec;
+  color: #2d4f2a;
+  font-weight: 600;
+}
+
+.account-sidebar-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 8px 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.account-sidebar-link {
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.account-sidebar-link:hover {
+  color: #2d4f2a;
+}
+
+.account-main {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .account-shell {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px 16px 40px;
+  }
+
+  .account-sidebar {
+    position: static;
+  }
+
+  .account-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .account-nav-link {
+    flex: 1 1 auto;
+    text-align: center;
+    min-width: 120px;
+  }
+}

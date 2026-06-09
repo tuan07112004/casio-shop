@@ -11,6 +11,11 @@ export const PAYMENT_METHOD_LABEL = {
   bank_transfer: 'Chuyển khoản',
 }
 
+export const PAYMENT_STATUS_LABEL = {
+  unpaid: 'Chưa thanh toán',
+  paid: 'Đã thanh toán',
+}
+
 export function formatOrderDate(iso) {
   if (!iso) return ''
   return new Date(iso).toLocaleString('vi-VN', {

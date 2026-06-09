@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { fetchProducts } from '../../api/client'
-import { formatPrice, productImageSrc } from '../../utils/format'
+import ProductCard from '../ProductCard/ProductCard'
+import { sortMayTinh } from '../../utils/productCard'
 import './ProductShowcase.css'
 
 const SECTIONS = [
@@ -22,40 +23,69 @@ const SECTIONS = [
   },
 ]
 
-const LIMIT = 3
+const VISIBLE_COUNT = 3
 
-function getOriginalPrice(price) {
-  return Math.ceil((price * 1.15) / 1000) * 1000
-}
+function ProductCarousel({ products }) {
+  const [index, setIndex] = useState(0)
+  const maxIndex = Math.max(0, products.length - VISIBLE_COUNT)
+  const showArrows = products.length > VISIBLE_COUNT
 
-function ProductCard({ product }) {
-  const cat = product.category || 'phu-kien'
-  const originalPrice = getOriginalPrice(product.price)
+  useEffect(() => {
+    setIndex((i) => Math.min(i, maxIndex))
+  }, [maxIndex, products.length])
+
+  const goPrev = () => setIndex((i) => Math.max(0, i - 1))
+  const goNext = () => setIndex((i) => Math.min(maxIndex, i + 1))
+
+  if (!showArrows) {
+    return (
+      <ul className="product-showcase-grid">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </ul>
+    )
+  }
+
+  const slidePercent =
+    products.length > 0 ? (index * 100) / products.length : 0
 
   return (
-    <li className="product-showcase-card">
-      <Link to={`/san-pham/${product.id}`} className="product-showcase-link">
-        <div className={`product-showcase-visual product-showcase-visual--${cat}`}>
-          <img
-            className="product-showcase-img"
-            src={productImageSrc(product.image)}
-            alt={product.name}
-            loading="lazy"
-          />
-        </div>
-        <div className="product-showcase-body">
-          <h3 className="product-showcase-name">{product.name}</h3>
-          <div className="product-showcase-prices">
-            <span className="product-showcase-price-original">
-              {formatPrice(originalPrice)}
-            </span>
-            <span className="product-showcase-price-sale">
-              {formatPrice(product.price)}
-            </span>
-          </div>
-        </div>
-      </Link>
-    </li>
+    <div className="product-showcase-carousel product-showcase-carousel--arrows">
+      <button
+        type="button"
+        className="product-showcase-arrow product-showcase-arrow--prev"
+        onClick={goPrev}
+        disabled={index === 0}
+        aria-label="Sản phẩm trước"
+      >
+        ‹
+      </button>
+
+      <div className="product-showcase-viewport">
+        <ul
+          className="product-showcase-track"
+          style={{
+            '--slide-count': products.length,
+            transform: `translateX(-${slidePercent}%)`,
+          }}
+        >
+          {products.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </ul>
+      </div>
+
+      <button
+        type="button"
+        className="product-showcase-arrow product-showcase-arrow--next"
+        onClick={goNext}
+        disabled={index >= maxIndex}
+        aria-label="Sản phẩm sau"
+      >
+        ›
+      </button>
+    </div>
   )
 }
 
@@ -75,6 +105,7 @@ export default function ProductShowcase() {
     for (const p of products) {
       if (map[p.category]) map[p.category].push(p)
     }
+    map['may-tinh'] = sortMayTinh(map['may-tinh'])
     return map
   }, [products])
 
@@ -82,7 +113,7 @@ export default function ProductShowcase() {
     () =>
       SECTIONS.map((section) => ({
         ...section,
-        products: (byCategory[section.key] || []).slice(0, LIMIT),
+        products: byCategory[section.key] || [],
       })).filter((section) => section.products.length > 0),
     [byCategory],
   )
@@ -125,11 +156,7 @@ export default function ProductShowcase() {
             </Link>
           </div>
 
-          <ul className="product-showcase-grid">
-            {section.products.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </ul>
+          <ProductCarousel products={section.products} />
         </section>
       ))}
     </div>

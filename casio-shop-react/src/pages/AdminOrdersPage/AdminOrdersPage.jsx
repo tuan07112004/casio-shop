@@ -5,12 +5,14 @@ import {
   apiFetchOrders,
   apiFetchOrderStats,
   apiUpdateOrderStatus,
+  apiUpdatePaymentStatus,
 } from '../../api/orders'
 import AdminStats from '../../components/AdminStats/AdminStats'
 import { formatPrice } from '../../utils/format'
 import {
   ORDER_STATUS_LABEL,
   PAYMENT_METHOD_LABEL,
+  PAYMENT_STATUS_LABEL,
   formatOrderDate,
 } from '../../utils/orderLabels'
 import './AdminOrdersPage.css'
@@ -38,6 +40,15 @@ export default function AdminOrdersPage() {
       setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)))
       const freshStats = await apiFetchOrderStats(token)
       setStats(freshStats)
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
+  const handlePaymentStatus = async (orderId, paymentStatus) => {
+    try {
+      const updated = await apiUpdatePaymentStatus(token, orderId, paymentStatus)
+      setOrders((prev) => prev.map((o) => (o.id === updated.id ? updated : o)))
     } catch (e) {
       alert(e.message)
     }
@@ -113,21 +124,38 @@ export default function AdminOrdersPage() {
                   <span className="admin-order-payment">
                     {PAYMENT_METHOD_LABEL[order.paymentMethod] || order.paymentMethod}
                   </span>
+                  <span
+                    className={`admin-order-pay-badge admin-order-pay-badge--${order.paymentStatus}`}
+                  >
+                    {PAYMENT_STATUS_LABEL[order.paymentStatus] || order.paymentStatus}
+                  </span>
                   <strong className="admin-order-total">
                     {formatPrice(order.totalAmount)}
                   </strong>
                 </div>
-                <label className="admin-order-status-select">
-                  Trạng thái
-                  <select
-                    value={order.status}
-                    onChange={(e) => handleStatus(order.id, e.target.value)}
-                  >
-                    {Object.entries(ORDER_STATUS_LABEL).map(([k, v]) => (
-                      <option key={k} value={k}>{v}</option>
-                    ))}
-                  </select>
-                </label>
+                <div className="admin-order-actions">
+                  {order.paymentMethod === 'bank_transfer' &&
+                    order.paymentStatus === 'unpaid' && (
+                      <button
+                        type="button"
+                        className="admin-order-confirm-pay"
+                        onClick={() => handlePaymentStatus(order.id, 'paid')}
+                      >
+                        Xác nhận đã nhận CK
+                      </button>
+                    )}
+                  <label className="admin-order-status-select">
+                    Trạng thái
+                    <select
+                      value={order.status}
+                      onChange={(e) => handleStatus(order.id, e.target.value)}
+                    >
+                      {Object.entries(ORDER_STATUS_LABEL).map(([k, v]) => (
+                        <option key={k} value={k}>{v}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
               </footer>
             </article>
           ))}

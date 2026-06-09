@@ -1,8 +1,23 @@
 .my-orders {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 32px 20px 56px;
   font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.my-orders .account-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+.my-orders .account-breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.my-orders .account-breadcrumb a:hover {
+  color: #2d4f2a;
 }
 
 .my-orders-title {
@@ -132,6 +147,37 @@
 .my-order-footer strong {
   font-size: 1.1rem;
   color: #2d4f2a;
+}
+
+.my-order-pay-badge {
+  font-weight: 600;
+}
+
+.my-order-pay-badge--unpaid {
+  color: #92400e;
+}
+
+.my-order-pay-badge--paid {
+  color: #166534;
+}
+
+.my-order-qr {
+  margin-top: 14px;
+  padding: 14px;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px dashed rgba(45, 79, 42, 0.25);
+  border-radius: 12px;
+}
+
+.my-order-qr-label {
+  margin: 0 0 10px;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.my-order-qr img {
+  border-radius: 8px;
 }
 
 .my-order-address {

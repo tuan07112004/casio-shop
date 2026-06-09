@@ -6,9 +6,9 @@
   
   .layout-main {
     flex: 1;
-    width: min(1200px, 100% - 32px);
+    width: min(1320px, 100% - 24px);
     margin: 0 auto;
-    padding: 24px 16px 48px;
+    padding: 24px 12px 48px;
     background: transparent;
   }
   
@@ -20,4 +20,16 @@
   .layout > .site-header,
   .layout > .header-menu {
     flex-shrink: 0;
+  }
+
+  .layout-main--account {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+    background: #f5f3ef;
+  }
+
+  .layout--account {
+    background: #f5f3ef;
   }

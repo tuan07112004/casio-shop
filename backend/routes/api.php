@@ -13,6 +13,7 @@ Route::post('/login', [AuthController::class, 'login']);
 
 // Đặt hàng — không bắt buộc đăng nhập
 Route::post('/orders', [OrderController::class, 'store']);
+Route::get('/orders/lookup', [OrderController::class, 'lookup']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'me']);
@@ -23,6 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/orders/stats', [OrderController::class, 'stats']);
         Route::get('/orders', [OrderController::class, 'index']);
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus']);
+        Route::patch('/orders/{order}/payment-status', [OrderController::class, 'updatePaymentStatus']);
 
         Route::post('/products/upload-image', [ProductController::class, 'uploadImage']);
         Route::post('/products', [ProductController::class, 'store']);

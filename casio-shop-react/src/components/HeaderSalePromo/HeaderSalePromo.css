@@ -1,0 +1,48 @@
+/* Trái-giữa thanh menu xanh — không đẩy lệch các mục nav */
+.header-sale-promo {
+  position: absolute;
+  left: 10%;
+  top: 50%;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+  display: block;
+  height: 72px;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.header-sale-promo:hover {
+  transform: translate(-50%, -50%) scale(1.05);
+}
+
+.header-sale-promo-img {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 260px;
+  object-fit: contain;
+  object-position: center;
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .header-sale-promo {
+    left: 8%;
+    height: 58px;
+  }
+
+  .header-sale-promo-img {
+    max-width: 190px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-sale-promo {
+    left: 6%;
+    height: 46px;
+  }
+
+  .header-sale-promo-img {
+    max-width: 130px;
+  }
+}

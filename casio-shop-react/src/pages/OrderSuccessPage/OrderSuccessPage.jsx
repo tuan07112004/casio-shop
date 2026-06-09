@@ -79,6 +79,13 @@ export default function OrderSuccessPage() {
         <p>Chúng tôi sẽ liên hệ xác nhận qua điện thoại hoặc email.</p>
       )}
 
+      {orderId && (
+        <p className="order-success-lookup-hint">
+          Lưu mã đơn và số điện thoại để tra cứu sau.{' '}
+          <Link to="/tra-cuu-don">Tra cứu đơn hàng</Link>
+        </p>
+      )}
+
       <div className="order-success-actions">
         <Link to="/cua-hang">Tiếp tục mua</Link>
         <Link to="/">Về trang chủ</Link>

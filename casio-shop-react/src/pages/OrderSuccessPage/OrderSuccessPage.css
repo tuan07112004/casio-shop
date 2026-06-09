@@ -124,6 +124,18 @@
   text-align: center;
 }
 
+.order-success-lookup-hint {
+  margin: 20px 0 0;
+  font-size: 0.9rem;
+  color: rgba(0, 0, 0, 0.55);
+  line-height: 1.5;
+}
+
+.order-success-lookup-hint a {
+  color: #2d4f2a;
+  font-weight: 600;
+}
+
 .order-success-actions {
   display: flex;
   gap: 12px;

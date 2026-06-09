@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Navigate, Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
 import ScrollToTop from './components/ScrollToTop/ScrollToTop'
@@ -20,7 +20,11 @@ import OrderSuccessPage from './pages/OrderSuccessPage/OrderSuccessPage'
 import AdminOrdersPage from './pages/AdminOrdersPage/AdminOrdersPage'
 import AdminProductsPage from './pages/AdminProductsPage/AdminProductsPage'
 import CustomerRoute from './components/CustomerRoute/CustomerRoute'
+import AccountLayout from './components/AccountLayout/AccountLayout'
+import AccountOverviewPage from './pages/AccountOverviewPage/AccountOverviewPage'
 import MyOrdersPage from './pages/MyOrdersPage/MyOrdersPage'
+import TraCuuDonRoute from './components/TraCuuDonRoute/TraCuuDonRoute'
+import OrderLookupPage from './pages/OrderLookupPage/OrderLookupPage'
 
 function App() {
   return (
@@ -29,7 +33,6 @@ function App() {
         <CartProvider>
           <ScrollToTop />
           <Routes>
-            {/* Shop — có Header + Footer */}
             <Route element={<Layout />}>
               <Route path="/" element={<HomePage />} />
               <Route path="/cua-hang" element={<ShopPage />} />
@@ -41,12 +44,20 @@ function App() {
               <Route path="/faq" element={<FAQPage />} />
               <Route path="/thanh-toan" element={<CheckoutPage />} />
               <Route path="/dat-hang-thanh-cong" element={<OrderSuccessPage />} />
+              <Route path="/tra-cuu-don" element={<TraCuuDonRoute />} />
               <Route element={<CustomerRoute />}>
-                <Route path="/don-hang-cua-toi" element={<MyOrdersPage />} />
+                <Route element={<AccountLayout />}>
+                  <Route path="/tai-khoan" element={<AccountOverviewPage />} />
+                  <Route path="/tai-khoan/don-hang" element={<MyOrdersPage />} />
+                  <Route path="/tai-khoan/tra-cuu" element={<OrderLookupPage />} />
+                </Route>
               </Route>
+              <Route
+                path="/don-hang-cua-toi"
+                element={<Navigate to="/tai-khoan/don-hang" replace />}
+              />
             </Route>
 
-            {/* Admin — KHÔNG Layout shop */}
             <Route element={<AdminRoute />}>
               <Route element={<AdminLayout />}>
                 <Route path="/admin" element={<AdminPage />} />

@@ -2,22 +2,26 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { fetchProduct } from '../../api/client'
 import { useCart } from '../../context/CartContext'
-import { formatPrice, productImageSrc } from '../../utils/format'
+import LogoMarquee from '../../components/LogoMarquee/LogoMarquee'
+import ProductDetailGallery from '../../components/ProductDetailGallery/ProductDetailGallery'
+import SimilarProducts from '../../components/SimilarProducts/SimilarProducts'
+import {
+  getColorPreviewImages,
+  getColorSwatches,
+  getConditionPrice,
+  getDiscountPercent,
+  getOriginalPrice,
+  getProductConditions,
+  getProductDescription,
+} from '../../utils/productCard'
+import { getProductGallery } from '../../utils/productGallery'
+import { formatPrice } from '../../utils/format'
 import './ProductDetailPage.css'
 
 const CATEGORY_LABEL = {
   'may-tinh': 'Máy tính',
   balo: 'Balo',
   'phu-kien': 'Phụ kiện',
-}
-
-function getOriginalPrice(price) {
-  return Math.ceil((price * 1.15) / 1000) * 1000
-}
-
-function getDiscountPercent(price, original) {
-  if (!original || original <= price) return 0
-  return Math.round(((original - price) / original) * 100)
 }
 
 export default function ProductDetailPage() {
@@ -29,6 +33,9 @@ export default function ProductDetailPage() {
   const [error, setError] = useState('')
   const [qty, setQty] = useState(1)
   const [added, setAdded] = useState(false)
+  const [selectedColor, setSelectedColor] = useState(0)
+  const [selectedCondition, setSelectedCondition] = useState(0)
+  const [colorPreviewSrc, setColorPreviewSrc] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -36,6 +43,9 @@ export default function ProductDetailPage() {
     setProduct(null)
     setQty(1)
     setAdded(false)
+    setSelectedColor(0)
+    setSelectedCondition(0)
+    setColorPreviewSrc(null)
 
     fetchProduct(id)
       .then(setProduct)
@@ -45,7 +55,12 @@ export default function ProductDetailPage() {
 
   const handleAdd = (goToCart = false) => {
     if (!product) return
-    addToCart(product, qty)
+    const productConditions = getProductConditions(product)
+    const conditionId = productConditions?.[selectedCondition]?.id
+    const price = productConditions
+      ? getConditionPrice(product, conditionId)
+      : product.price
+    addToCart({ ...product, price }, qty)
     if (goToCart) {
       navigate('/gio-hang')
       return
@@ -75,56 +90,107 @@ export default function ProductDetailPage() {
     )
   }
 
-  const catClass = product.category?.replace(/[^a-z0-9-]/g, '') || 'phu-kien'
   const catLabel = CATEGORY_LABEL[product.category] || 'Sản phẩm'
-  const originalPrice = getOriginalPrice(product.price)
-  const discount = getDiscountPercent(product.price, originalPrice)
-  const savings = originalPrice - product.price
+  const conditions = getProductConditions(product)
+  const selectedConditionId = conditions?.[selectedCondition]?.id
+  const salePrice = conditions
+    ? getConditionPrice(product, selectedConditionId)
+    : product.price
+  const originalPrice = getOriginalPrice(salePrice)
+  const discount = getDiscountPercent(salePrice, originalPrice)
+  const colorSwatches = getColorSwatches(product)
+  const colorPreviewImages = getColorPreviewImages(product)
+  const galleryItems = getProductGallery(product)
 
   return (
-    <div className="product-detail">
-      <nav className="product-detail-breadcrumb" aria-label="Đường dẫn">
-        <Link to="/cua-hang">Cửa hàng</Link>
-        <span aria-hidden="true">/</span>
-        <Link to={`/cua-hang?category=${product.category}`}>{catLabel}</Link>
-        <span aria-hidden="true">/</span>
-        <span className="product-detail-breadcrumb-current">{product.name}</span>
-      </nav>
-
+    <div className="product-detail-page">
+      <div className="product-detail">
       <article className="product-detail-layout">
-        <div className={`product-detail-visual product-detail-visual--${catClass}`}>
-          <img
-            src={productImageSrc(product.image)}
-            alt={product.name}
-            className="product-detail-img"
-          />
-        </div>
+        <ProductDetailGallery
+          items={galleryItems}
+          productName={product.name}
+          stageOverride={colorPreviewSrc}
+        />
 
         <div className="product-detail-info">
+          <nav className="product-detail-breadcrumb" aria-label="Đường dẫn">
+            <Link to="/">Trang chủ</Link>
+            <span aria-hidden="true">/</span>
+            <Link to="/cua-hang">Sản phẩm</Link>
+            <span aria-hidden="true">/</span>
+            <span className="product-detail-breadcrumb-current">{catLabel}</span>
+          </nav>
+
           <h1 className="product-detail-name">{product.name}</h1>
 
+          {conditions && (
+            <div className="product-detail-condition">
+              <span className="product-detail-field-label">Độ mới</span>
+              <div className="product-detail-condition-row">
+                {conditions.map((item, i) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    className={`product-detail-condition-btn${selectedCondition === i ? ' product-detail-condition-btn--active' : ''}`}
+                    aria-pressed={selectedCondition === i}
+                    onClick={() => setSelectedCondition(i)}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="product-detail-prices">
-            <span className="product-detail-price-sale">
-              {formatPrice(product.price)}
-            </span>
+            <span className="product-detail-price-sale">{formatPrice(salePrice)}</span>
             {discount > 0 && (
-              <>
-                <span className="product-detail-price-original">
-                  {formatPrice(originalPrice)}
-                </span>
-                <span className="product-detail-discount">-{discount}%</span>
-              </>
+              <span className="product-detail-price-original">
+                {formatPrice(originalPrice)}
+              </span>
             )}
           </div>
 
-          {savings > 0 && (
-            <p className="product-detail-savings">
-              (Tiết kiệm {formatPrice(savings)})
-            </p>
+          <div className="product-detail-desc-block">
+            <h2 className="product-detail-desc-heading">Mô tả</h2>
+            <p className="product-detail-desc">{getProductDescription(product)}</p>
+          </div>
+
+          {colorSwatches && (
+            <div
+              className="product-detail-colors"
+              onMouseLeave={() => setColorPreviewSrc(null)}
+            >
+              <span className="product-detail-field-label">Màu sắc</span>
+              <div className="product-detail-swatch-row">
+                {colorSwatches.map((swatch, i) => (
+                  <button
+                    key={swatch.label}
+                    type="button"
+                    className={`product-detail-swatch${selectedColor === i ? ' product-detail-swatch--active' : ''}`}
+                    title={swatch.label}
+                    aria-label={swatch.label}
+                    aria-pressed={selectedColor === i}
+                    onClick={() => setSelectedColor(i)}
+                    onMouseEnter={() => {
+                      setSelectedColor(i)
+                      if (colorPreviewImages?.[i]) {
+                        setColorPreviewSrc(colorPreviewImages[i])
+                      }
+                    }}
+                  >
+                    <span
+                      className="product-detail-swatch-inner"
+                      style={{ backgroundColor: swatch.hex }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           <div className="product-detail-qty-block">
-            <span className="product-detail-qty-label">Số lượng</span>
+            <span className="product-detail-field-label">Chọn số lượng</span>
             <div className="product-detail-qty-controls">
               <button
                 type="button"
@@ -149,17 +215,17 @@ export default function ProductDetailPage() {
           <div className="product-detail-btns">
             <button
               type="button"
+              className="product-detail-btn product-detail-btn--cart"
+              onClick={() => handleAdd(false)}
+            >
+              Thêm vào giỏ hàng
+            </button>
+            <button
+              type="button"
               className="product-detail-btn product-detail-btn--buy"
               onClick={() => handleAdd(true)}
             >
               Mua ngay
-            </button>
-            <button
-              type="button"
-              className="product-detail-btn product-detail-btn--cart"
-              onClick={() => handleAdd(false)}
-            >
-              Thêm vào giỏ
             </button>
           </div>
 
@@ -168,15 +234,14 @@ export default function ProductDetailPage() {
               ✓ Đã thêm vào giỏ · <Link to="/gio-hang">Xem giỏ hàng</Link>
             </p>
           )}
-
-          <ul className="product-detail-trust">
-            <li>🚚 Giao hàng toàn quốc</li>
-            <li>✓ Cam kết chính hãng</li>
-            <li>☎ Hỗ trợ 0988 480 655</li>
-          </ul>
         </div>
       </article>
+      </div>
+
+      <div className="product-detail-below">
+        <LogoMarquee />
+        <SimilarProducts product={product} />
+      </div>
     </div>
   )
 }
-
