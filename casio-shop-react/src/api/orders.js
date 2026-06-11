@@ -24,6 +24,10 @@ export function mapApiOrder(row) {
     paymentStatus: row.payment_status,
     status: row.status,
     totalAmount: row.total_amount,
+    voucherCode: row.voucher_code,
+    discountAmount: row.discount_amount,
+    shippingFee: row.shipping_fee,
+    deliveryType: row.delivery_type,
     note: row.note,
     createdAt: row.created_at,
     items: (row.items || []).map((item) => ({

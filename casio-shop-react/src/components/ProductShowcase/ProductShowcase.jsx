@@ -5,23 +5,11 @@ import ProductCard from '../ProductCard/ProductCard'
 import { sortMayTinh } from '../../utils/productCard'
 import './ProductShowcase.css'
 
-const SECTIONS = [
-  {
-    key: 'may-tinh',
-    title: 'Máy tính Casio',
-    shopUrl: '/cua-hang?category=may-tinh',
-  },
-  {
-    key: 'balo',
-    title: 'Balo',
-    shopUrl: '/cua-hang?category=balo',
-  },
-  {
-    key: 'phu-kien',
-    title: 'Phụ kiện',
-    shopUrl: '/cua-hang?category=phu-kien',
-  },
-]
+import {
+  getCategoryValues,
+  getShopCategoryUrl,
+} from '../../config/categories'
+import { useCategories } from '../../context/CategoriesContext'
 
 const VISIBLE_COUNT = 3
 
@@ -90,8 +78,19 @@ function ProductCarousel({ products }) {
 }
 
 export default function ProductShowcase() {
+  const { categories } = useCategories()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+
+  const sections = useMemo(
+    () =>
+      categories.map((c) => ({
+        key: c.value,
+        title: c.value === 'may-tinh' ? 'Máy tính Casio' : c.shopLabel,
+        shopUrl: getShopCategoryUrl(c.value),
+      })),
+    [categories],
+  )
 
   useEffect(() => {
     fetchProducts()
@@ -101,21 +100,23 @@ export default function ProductShowcase() {
   }, [])
 
   const byCategory = useMemo(() => {
-    const map = { 'may-tinh': [], balo: [], 'phu-kien': [] }
+    const map = Object.fromEntries(
+      getCategoryValues(categories).map((key) => [key, []]),
+    )
     for (const p of products) {
       if (map[p.category]) map[p.category].push(p)
     }
     map['may-tinh'] = sortMayTinh(map['may-tinh'])
     return map
-  }, [products])
+  }, [products, categories])
 
   const visibleSections = useMemo(
     () =>
-      SECTIONS.map((section) => ({
+      sections.map((section) => ({
         ...section,
         products: byCategory[section.key] || [],
       })).filter((section) => section.products.length > 0),
-    [byCategory],
+    [byCategory, sections],
   )
 
   if (loading) {

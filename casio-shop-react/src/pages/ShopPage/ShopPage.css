@@ -1,8 +1,56 @@
 /* Trang cá»­a hÃ ng â€” layout chung dÃ¹ng ProductShowcase.css */
 
 .shop-page {
-  padding-top: 8px;
+  padding-top: 0;
   padding-bottom: 64px;
+}
+
+.shop-category-tabs {
+  display: flex;
+  width: 100%;
+  margin: 0 0 36px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: var(--page-bg, #f5f0e6);
+}
+
+.shop-category-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 14px 12px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  font-weight: 400;
+  color: rgba(0, 0, 0, 0.72);
+  text-decoration: none;
+  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  background: transparent;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.shop-category-tab:last-child {
+  border-right: none;
+}
+
+.shop-category-tab:hover {
+  background: rgba(255, 255, 255, 0.45);
+  color: #1a1a1a;
+}
+
+.shop-category-tab--active {
+  background: rgba(255, 255, 255, 0.55);
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.shop-page-products {
+  padding-top: 0;
 }
 
 .shop-status--error {

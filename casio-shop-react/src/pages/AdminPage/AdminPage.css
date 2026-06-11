@@ -1,129 +1,150 @@
-﻿.admin-page {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 40px 20px 64px;
-    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-  }
-  
-  .admin-card {
-    padding: 36px 32px;
-    background: rgba(255, 255, 255, 0.75);
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 20px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+.admin-dashboard {
+  max-width: 1100px;
+}
+
+.admin-dashboard-welcome {
+  margin-bottom: 20px;
+}
+
+.admin-dashboard-welcome h1 {
+  margin: 0 0 8px;
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.admin-dashboard-welcome p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: #666;
+}
+
+.admin-panel {
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.admin-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.admin-panel-head h2 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.admin-panel-more {
+  font-size: 0.85rem;
+  color: #2673dd;
+  text-decoration: none;
+}
+
+.admin-panel-more:hover {
+  text-decoration: underline;
+}
+
+.admin-order-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.admin-order-summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 12px;
+  text-align: center;
+  text-decoration: none;
+  color: inherit;
+  border-right: 1px solid #f0f0f0;
+  transition: background 0.12s ease;
+}
+
+.admin-order-summary-card:last-child {
+  border-right: none;
+}
+
+.admin-order-summary-card:hover {
+  background: #fafafa;
+}
+
+.admin-order-summary-card strong {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #2673dd;
+  line-height: 1;
+}
+
+.admin-order-summary-card span {
+  font-size: 0.82rem;
+  color: #666;
+  line-height: 1.35;
+}
+
+.admin-panel--sales .admin-panel-head {
+  border-bottom: none;
+}
+
+.admin-sales-hero {
+  padding: 28px 24px 32px;
+  text-align: center;
+  background: linear-gradient(135deg, #fff7f0 0%, #fff 55%);
+}
+
+.admin-sales-hero-label {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.admin-sales-hero-value {
+  margin: 0;
+  font-size: clamp(2.2rem, 6vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: #e85d04;
+  letter-spacing: -0.02em;
+}
+
+.admin-sales-hero-sub {
+  margin: 14px 0 0;
+  font-size: 0.92rem;
+  color: #666;
+}
+
+.admin-dashboard-loading {
+  margin: 0;
+  padding: 24px 18px;
+  font-size: 0.9rem;
+  color: #888;
+}
+
+@media (max-width: 720px) {
+  .admin-order-summary {
+    grid-template-columns: 1fr;
   }
 
-  .admin-card--wide {
-    max-width: 960px;
-    margin: 0 auto;
+  .admin-order-summary-card {
+    border-right: none;
+    border-bottom: 1px solid #f0f0f0;
   }
-  
-  .admin-badge {
-    display: inline-block;
-    margin: 0 0 12px;
-    padding: 6px 14px;
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #fff;
-    background: #3d4f2a;
-    border-radius: 999px;
-  }
-  
-  .admin-title {
-    margin: 0 0 12px;
-    font-family: var(--font-display);
-    font-size: 1.75rem;
-    font-weight: 400;
-    color: #1a1a1a;
-  }
-  
-  .admin-welcome {
-    margin: 0 0 8px;
-    font-size: 1rem;
-    color: #374151;
-  }
-  
-  .admin-desc {
-    margin: 0 0 24px;
-    font-size: 0.95rem;
-    line-height: 1.55;
-    color: rgba(0, 0, 0, 0.55);
-  }
-  
-  .admin-menu {
-    list-style: none;
-    margin: 0 0 28px;
-    padding: 0;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  
-  .admin-menu li {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 14px 18px;
-    background: #fff;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  }
-  
-  .admin-menu li:last-child {
+
+  .admin-order-summary-card:last-child {
     border-bottom: none;
   }
-  
-  .admin-menu-label {
-    font-weight: 600;
-    color: #111827;
-    text-decoration: none;
-  }
-
-  a.admin-menu-label:hover {
-    color: #2d4f2a;
-  }
-  
-  .admin-menu-arrow {
-    font-size: 1rem;
-    color: #94a3b8;
-  }
-  
-  .admin-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  
-  .admin-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 12px 20px;
-    border-radius: 999px;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-    border: none;
-  }
-  
-  .admin-btn--primary {
-    background: #1a1a1a;
-    color: #fff;
-  }
-  
-  .admin-btn--secondary {
-    background: transparent;
-    color: #1a1a1a;
-    border: 1px solid rgba(0, 0, 0, 0.2);
-  }
-
-  .admin-route-loading {
-    min-height: 40vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
-  }
+}

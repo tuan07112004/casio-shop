@@ -1,65 +1,101 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { apiFetchOrderStats } from '../../api/orders'
-import AdminStats from '../../components/AdminStats/AdminStats'
+import { formatPrice } from '../../utils/format'
 import './AdminPage.css'
 
+const POLL_MS = 15000
+
 export default function AdminPage() {
-  const { user, logout, token } = useAuth()
+  const { user, token } = useAuth()
   const [stats, setStats] = useState(null)
 
+  const loadStats = useCallback(
+    (silent = false) => {
+      if (!token) return
+      apiFetchOrderStats(token)
+        .then(setStats)
+        .catch(() => {})
+    },
+    [token],
+  )
+
   useEffect(() => {
-    apiFetchOrderStats(token)
-      .then(setStats)
-      .catch(() => {})
-  }, [token])
+    loadStats()
+  }, [loadStats])
+
+  useEffect(() => {
+    const poll = setInterval(() => loadStats(true), POLL_MS)
+    return () => clearInterval(poll)
+  }, [loadStats])
+
+  const orderCards = stats
+    ? [
+        {
+          label: 'Chờ lấy hàng',
+          value: stats.to_ship_orders ?? stats.pending_orders ?? 0,
+          to: '/admin/don-hang',
+        },
+        {
+          label: 'Đã xử lý',
+          value: stats.processed_orders ?? stats.completed_orders ?? 0,
+          to: '/admin/don-hang',
+        },
+        {
+          label: 'Đơn trả hàng / Hoàn tiền / Hủy',
+          value: stats.cancelled_orders ?? 0,
+          to: '/admin/don-hang',
+        },
+      ]
+    : []
 
   return (
-    <div className="admin-page">
-      <div className="admin-card admin-card--wide">
-        <p className="admin-badge">Quản trị viên</p>
-        <h1 className="admin-title">Trang Admin</h1>
-        <p className="admin-welcome">
-          Xin chào, <strong>{user?.name}</strong> ({user?.email})
+    <div className="admin-dashboard">
+      <header className="admin-dashboard-welcome">
+        <h1>Chào mừng bạn đến với Trang Quản trị Viên!</h1>
+        <p>
+          Xin chào, <strong>{user?.name}</strong> — quản lý cửa hàng Lytus Casio.
         </p>
-        <p className="admin-desc">
-          Quản lý sản phẩm và đơn hàng cửa hàng Lytus Casio.
-        </p>
+      </header>
 
-        <AdminStats stats={stats} />
+      {orderCards.length > 0 && (
+        <section className="admin-panel">
+          <div className="admin-panel-head">
+            <h2>Đơn hàng</h2>
+          </div>
+          <div className="admin-order-summary">
+            {orderCards.map((card) => (
+              <Link key={card.label} to={card.to} className="admin-order-summary-card">
+                <strong>{card.value}</strong>
+                <span>{card.label}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
-        <ul className="admin-menu">
-          <li>
-            <Link to="/admin/san-pham" className="admin-menu-label">
-              Quản lý sản phẩm
-            </Link>
-            <span className="admin-menu-arrow">→</span>
-          </li>
-          <li>
-            <Link to="/admin/don-hang" className="admin-menu-label">
-              Đơn hàng &amp; doanh thu
-            </Link>
-            <span className="admin-menu-arrow">→</span>
-          </li>
-        </ul>
-
-        <div className="admin-actions">
-          <Link to="/" className="admin-btn admin-btn--secondary">
-            Về trang chủ
+      <section className="admin-panel admin-panel--sales">
+        <div className="admin-panel-head">
+          <h2>Phân tích bán hàng</h2>
+          <Link to="/admin/phan-tich" className="admin-panel-more">
+            Xem thêm ›
           </Link>
-          <Link to="/cua-hang" className="admin-btn admin-btn--secondary">
-            Xem cửa hàng
-          </Link>
-          <button
-            type="button"
-            className="admin-btn admin-btn--primary"
-            onClick={() => logout()}
-          >
-            Đăng xuất
-          </button>
         </div>
-      </div>
+        {stats ? (
+          <div className="admin-sales-hero">
+            <p className="admin-sales-hero-label">Doanh số hôm nay</p>
+            <p className="admin-sales-hero-value">
+              {formatPrice(stats.today_revenue)}
+            </p>
+            <p className="admin-sales-hero-sub">
+              {stats.today_orders} đơn hàng hôm nay
+            </p>
+          </div>
+        ) : (
+          <p className="admin-dashboard-loading">Đang tải thống kê...</p>
+        )}
+      </section>
     </div>
   )
 }

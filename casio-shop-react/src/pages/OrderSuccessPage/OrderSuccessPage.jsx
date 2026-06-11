@@ -13,6 +13,7 @@ export default function OrderSuccessPage() {
   const payment = params.get('payment')
   const amount = params.get('amount')
   const isBankTransfer = payment === 'bank_transfer'
+  const isCod = payment === 'cod'
   const qrUrl = isBankTransfer && orderId ? buildVietQrUrl(orderId, amount) : null
 
   return (
@@ -73,6 +74,23 @@ export default function OrderSuccessPage() {
           <p className="order-success-bank-note">
             Sau khi chuyển khoản, chúng tôi sẽ xác nhận và giao hàng trong thời
             gian sớm nhất.
+          </p>
+        </div>
+      ) : isCod ? (
+        <div className="order-success-online">
+          <h2>Thanh toán khi nhận hàng</h2>
+          <p>
+            Đơn hàng đã được tạo. Vui lòng thanh toán tiền mặt cho shipper khi nhận hàng
+            {amount ? (
+              <>
+                {' '}
+                với số tiền <strong>{formatPrice(Number(amount))}</strong>
+              </>
+            ) : null}
+            .
+          </p>
+          <p className="order-success-online-note">
+            Chúng tôi sẽ liên hệ xác nhận và giao hàng trong thời gian sớm nhất.
           </p>
         </div>
       ) : (

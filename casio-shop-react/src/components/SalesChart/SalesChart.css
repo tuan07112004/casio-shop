@@ -1,0 +1,74 @@
+.sales-chart {
+  padding: 4px 12px 12px;
+}
+
+.sales-chart--single .sales-chart-legend {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.sales-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: #555;
+}
+
+.sales-chart-legend-item::before {
+  content: '';
+  width: 18px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.sales-chart-legend-item--today::before {
+  background: #ee4d2d;
+}
+
+.sales-chart-svg {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.sales-chart-grid {
+  stroke: #f0f0f0;
+  stroke-width: 1;
+}
+
+.sales-chart-axis {
+  font-size: 10px;
+  fill: #aaa;
+}
+
+.sales-chart-area {
+  stroke: none;
+}
+
+.sales-chart-line {
+  fill: none;
+  stroke: #ee4d2d;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.sales-chart-dot {
+  fill: #ee4d2d;
+}
+
+.sales-chart-x-label {
+  font-size: 10px;
+  fill: #999;
+}
+
+.sales-chart-empty {
+  margin: 0;
+  padding: 40px 12px;
+  text-align: center;
+  color: #888;
+  font-size: 0.88rem;
+}

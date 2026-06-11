@@ -1,5 +1,7 @@
 import { Link, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { AdminToastProvider } from '../../context/AdminToastContext'
+import AdminSidebar from '../AdminSidebar/AdminSidebar'
 import './AdminLayout.css'
 
 export default function AdminLayout() {
@@ -12,27 +14,37 @@ export default function AdminLayout() {
   }
 
   return (
+    <AdminToastProvider>
     <div className="admin-shell">
-      <header className="admin-shell-header">
-        <div className="admin-shell-inner">
-          <Link to="/admin" className="admin-shell-brand">
-            Lytus · Quản trị
+      <header className="admin-topbar">
+        <div className="admin-topbar-inner">
+          <Link to="/admin" className="admin-topbar-brand">
+            <img
+              src="/images/logo.png"
+              alt="Lytus"
+              className="admin-topbar-logo"
+            />
+            <span className="admin-topbar-brand-sub">Trang admin</span>
           </Link>
-          <div className="admin-shell-actions">
-            <span className="admin-shell-user">{user?.name}</span>
-            <Link to="/" className="admin-shell-link">
+          <div className="admin-topbar-actions">
+            <span className="admin-topbar-user">{user?.name}</span>
+            <Link to="/" className="admin-topbar-link">
               Xem website
             </Link>
-            <button type="button" className="admin-shell-logout" onClick={handleLogout}>
+            <button type="button" className="admin-topbar-logout" onClick={handleLogout}>
               Đăng xuất
             </button>
           </div>
         </div>
       </header>
 
-      <main className="admin-shell-main">
-        <Outlet />
-      </main>
+      <div className="admin-body">
+        <AdminSidebar />
+        <main className="admin-content">
+          <Outlet />
+        </main>
+      </div>
     </div>
+    </AdminToastProvider>
   )
 }

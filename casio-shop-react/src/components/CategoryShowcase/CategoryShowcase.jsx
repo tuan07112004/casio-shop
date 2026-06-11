@@ -1,42 +1,33 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { getCategoryShowcaseItems } from '../../config/categories'
+import { useCategories } from '../../context/CategoriesContext'
 import './CategoryShowcase.css'
 
-const categories = [
-  {
-    title: 'Máy tính',
-    image: '/images/categories/may-tinh.png',
-    to: '/cua-hang?category=calculator',
-  },
-  {
-    title: 'Đô dùng học tập',
-    image: '/images/categories/phu-kien.png',
-    to: '/cua-hang?category=accessory',
-  },
-  {
-    title: 'Balo thời trang',
-    image: '/images/categories/balo.png',
-    to: '/cua-hang?category=bag',
-  },
-]
-
 export default function CategoryShowcase() {
+  const { categories } = useCategories()
+  const showcaseItems = useMemo(
+    () => getCategoryShowcaseItems(categories),
+    [categories],
+  )
+
   return (
     <section className="category-showcase" aria-labelledby="category-showcase-title">
-<div className="category-title-wrap">
-  <span className="category-sparkle category-sparkle--left" aria-hidden>
-    ✦
-  </span>
-  <h2 id="category-showcase-title" className="category-showcase-title">
-    Danh mục nổi bật
-  </h2>
-  <span className="category-sparkle category-sparkle--right" aria-hidden>
-    ✦
-  </span>
-</div>
+      <div className="category-title-wrap">
+        <span className="category-sparkle category-sparkle--left" aria-hidden>
+          ✦
+        </span>
+        <h2 id="category-showcase-title" className="category-showcase-title">
+          Danh mục nổi bật
+        </h2>
+        <span className="category-sparkle category-sparkle--right" aria-hidden>
+          ✦
+        </span>
+      </div>
 
       <div className="category-grid">
-        {categories.map((item) => (
-          <Link key={item.title} to={item.to} className="category-card">
+        {showcaseItems.map((item) => (
+          <Link key={item.to} to={item.to} className="category-card">
             <div className="category-card-visual">
               <img
                 src={item.image}

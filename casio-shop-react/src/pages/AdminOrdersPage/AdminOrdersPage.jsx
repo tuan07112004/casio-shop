@@ -1,5 +1,4 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import {
   apiFetchOrders,
@@ -7,7 +6,6 @@ import {
   apiUpdateOrderStatus,
   apiUpdatePaymentStatus,
 } from '../../api/orders'
-import AdminStats from '../../components/AdminStats/AdminStats'
 import { formatPrice } from '../../utils/format'
 import {
   ORDER_STATUS_LABEL,
@@ -17,12 +15,22 @@ import {
 } from '../../utils/orderLabels'
 import './AdminOrdersPage.css'
 
+const STATUS_FILTERS = [
+  { key: 'all', label: 'Tất cả' },
+  { key: 'pending', label: 'Chờ xử lý' },
+  { key: 'confirmed', label: 'Đã xác nhận' },
+  { key: 'shipping', label: 'Đang giao' },
+  { key: 'completed', label: 'Hoàn tất' },
+  { key: 'cancelled', label: 'Đã hủy' },
+]
+
 export default function AdminOrdersPage() {
   const { token } = useAuth()
   const [orders, setOrders] = useState([])
   const [stats, setStats] = useState(null)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+  const [statusFilter, setStatusFilter] = useState('all')
 
   useEffect(() => {
     Promise.all([apiFetchOrders(token), apiFetchOrderStats(token)])
@@ -33,6 +41,19 @@ export default function AdminOrdersPage() {
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false))
   }, [token])
+
+  const statusCounts = useMemo(() => {
+    const counts = { all: orders.length }
+    for (const order of orders) {
+      counts[order.status] = (counts[order.status] || 0) + 1
+    }
+    return counts
+  }, [orders])
+
+  const filteredOrders = useMemo(() => {
+    if (statusFilter === 'all') return orders
+    return orders.filter((o) => o.status === statusFilter)
+  }, [orders, statusFilter])
 
   const handleStatus = async (orderId, status) => {
     try {
@@ -74,21 +95,59 @@ export default function AdminOrdersPage() {
     <div className="admin-orders">
       <header className="admin-orders-header">
         <div>
-          <h1>Quản lý đơn hàng</h1>
-          <p className="admin-orders-desc">Theo dõi doanh thu và xử lý đơn Lytus Casio</p>
+          <h1>Tất cả đơn hàng</h1>
+          <p className="admin-orders-desc">Theo dõi và xử lý đơn hàng Lytus Casio</p>
         </div>
-        <Link to="/admin" className="admin-orders-back">
-          ← Về admin
-        </Link>
       </header>
 
-      <AdminStats stats={stats} />
+      {stats && (
+        <div className="admin-orders-stats">
+          <div className="admin-orders-stat">
+            <span className="admin-orders-stat-value">{stats.today_orders}</span>
+            <span className="admin-orders-stat-label">Hôm nay</span>
+          </div>
+          <div className="admin-orders-stat">
+            <span className="admin-orders-stat-value">{stats.to_ship_orders ?? 0}</span>
+            <span className="admin-orders-stat-label">Chờ lấy hàng</span>
+          </div>
+          <div className="admin-orders-stat">
+            <span className="admin-orders-stat-value">{stats.processed_orders ?? 0}</span>
+            <span className="admin-orders-stat-label">Đã xử lý</span>
+          </div>
+          <div className="admin-orders-stat">
+            <span className="admin-orders-stat-value">{stats.total_orders}</span>
+            <span className="admin-orders-stat-label">Tổng đơn</span>
+          </div>
+        </div>
+      )}
 
-      {orders.length === 0 ? (
-        <div className="admin-orders-empty">Chưa có đơn nào.</div>
+      <div className="admin-orders-filters">
+        {STATUS_FILTERS.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            className={`admin-orders-filter-btn${
+              statusFilter === tab.key ? ' admin-orders-filter-btn--active' : ''
+            }`}
+            onClick={() => setStatusFilter(tab.key)}
+          >
+            {tab.label}
+            <span className="admin-orders-filter-count">
+              {statusCounts[tab.key] ?? 0}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {filteredOrders.length === 0 ? (
+        <div className="admin-orders-empty">
+          {orders.length === 0
+            ? 'Chưa có đơn nào.'
+            : 'Không có đơn ở trạng thái này.'}
+        </div>
       ) : (
         <div className="admin-orders-list">
-          {orders.map((order) => (
+          {filteredOrders.map((order) => (
             <article key={order.id} className="admin-order-card">
               <div className="admin-order-head">
                 <div className="admin-order-id-block">
@@ -105,7 +164,9 @@ export default function AdminOrdersPage() {
                 <a href={`tel:${order.guestPhone}`} className="admin-order-phone">
                   {order.guestPhone}
                 </a>
-                <span className="admin-order-email">{order.guestEmail}</span>
+                {order.guestEmail && (
+                  <span className="admin-order-email">{order.guestEmail}</span>
+                )}
               </div>
 
               <p className="admin-order-address">{order.guestAddress}</p>
@@ -113,7 +174,9 @@ export default function AdminOrdersPage() {
               <ul className="admin-order-items">
                 {order.items.map((item) => (
                   <li key={item.id}>
-                    <span>{item.productName} × {item.quantity}</span>
+                    <span>
+                      {item.productName} × {item.quantity}
+                    </span>
                     <span>{formatPrice(item.lineTotal)}</span>
                   </li>
                 ))}
@@ -151,7 +214,9 @@ export default function AdminOrdersPage() {
                       onChange={(e) => handleStatus(order.id, e.target.value)}
                     >
                       {Object.entries(ORDER_STATUS_LABEL).map(([k, v]) => (
-                        <option key={k} value={k}>{v}</option>
+                        <option key={k} value={k}>
+                          {v}
+                        </option>
                       ))}
                     </select>
                   </label>

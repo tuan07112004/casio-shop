@@ -1,28 +1,48 @@
-import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useAdminToast } from '../../context/AdminToastContext'
+import AdminProductFormShopee from '../AdminProductFormPage/AdminProductFormShopee'
 import { fetchProducts } from '../../api/client'
 import {
   apiAdminCreateProduct,
   apiAdminUpdateProduct,
   apiAdminDeleteProduct,
   apiAdminUploadImage,
+  apiAdminUploadVideo,
 } from '../../api/adminProducts'
-import { ADMIN_COLOR_OPTIONS } from '../../utils/productCard'
 import { formatPrice, productImageSrc } from '../../utils/format'
+import {
+  buildVariantsPayload,
+  getActiveVariantGroups,
+  getMinSkuPrice,
+  getProductTotalStock,
+  getSkuDisplayLabel,
+  syncLegacyFieldsFromVariants,
+  variantsFromLegacyProduct,
+} from '../../utils/productVariants'
+import {
+  formatProductListPrice,
+  getProductListPrice,
+} from '../../utils/productCard'
+import { apiAdminCreateCategory } from '../../api/categories'
+import { useCategories } from '../../context/CategoriesContext'
 import './AdminProductsPage.css'
 
-const CATEGORIES = [
-  { value: 'may-tinh', label: 'Máy tính' },
-  { value: 'balo', label: 'Balo' },
-  { value: 'phu-kien', label: 'Phụ kiện' },
+const ICON_PEN = '/images/icon/pen.png'
+const ICON_TRASH = '/images/icon/iconTrash.png'
+
+const SORT_OPTIONS = [
+  { key: 'default', label: 'Mặc định' },
+  { key: 'price', label: 'Giá' },
+  { key: 'stock', label: 'Kho hàng' },
 ]
 
 const EMPTY_FORM = {
   name: '',
   price: '',
   image: '',
-  category: 'may-tinh',
+  category: '',
   description: '',
   hover_image: '',
   price_like_new: '',
@@ -30,20 +50,36 @@ const EMPTY_FORM = {
   price_70: '',
   price_55: '',
   colorKeys: [],
+  gallery_images: [],
   gallery_main_image: '',
   gallery_video: '',
+  variantsData: null,
+  simpleStock: '',
 }
 
-function colorKeysFromProduct(product) {
-  if (!product?.colors?.length) return []
-  return product.colors
-    .map((c) => {
-      const found = ADMIN_COLOR_OPTIONS.find(
-        (o) => o.hex === c.hex && o.label === c.label,
-      )
-      return found?.key
-    })
-    .filter(Boolean)
+function syncGalleryFields(images) {
+  return {
+    gallery_images: images,
+    image: images[0] || '',
+    hover_image: images[1] || '',
+    gallery_main_image: images[0] || '',
+  }
+}
+
+function buildGalleryImages(product) {
+  if (product.galleryImages?.length) {
+    return product.galleryImages.map((p) => String(p).trim()).filter(Boolean)
+  }
+
+  const images = []
+  const add = (path) => {
+    const value = String(path || '').trim()
+    if (value && !images.includes(value)) images.push(value)
+  }
+
+  add(product.imagePath || product.image)
+  add(product.hoverImagePath)
+  return images
 }
 
 function parseOptionalPrice(value) {
@@ -53,6 +89,13 @@ function parseOptionalPrice(value) {
 }
 
 function productToForm(product) {
+  const variantsData = variantsFromLegacyProduct(product)
+  const simpleStock =
+    product.variants?.skus?.length === 1 &&
+    !(product.variants.skus[0].optionIds || []).length
+      ? String(product.variants.skus[0].stock ?? '')
+      : ''
+
   return {
     name: product.name,
     price: String(product.price),
@@ -64,14 +107,19 @@ function productToForm(product) {
     price_85: product.price85 ? String(product.price85) : '',
     price_70: product.price70 ? String(product.price70) : '',
     price_55: product.price55 ? String(product.price55) : '',
-    colorKeys: colorKeysFromProduct(product),
-    gallery_main_image: product.galleryMainImagePath || '',
+    colorKeys: [],
+    gallery_images: buildGalleryImages(product),
+    gallery_main_image: product.galleryMainImagePath || product.imagePath || '',
     gallery_video: product.galleryVideo || '',
+    variantsData,
+    simpleStock,
   }
 }
 
-export default function AdminProductsPage() {
+export default function AdminProductsPage({ addMode = false }) {
   const { token } = useAuth()
+  const { showToast } = useAdminToast()
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -81,6 +129,43 @@ export default function AdminProductsPage() {
   const [uploadingField, setUploadingField] = useState('')
   const [localPreviews, setLocalPreviews] = useState({})
   const [formError, setFormError] = useState('')
+  const [sortBy, setSortBy] = useState('default')
+  const [sortDir, setSortDir] = useState('asc')
+  const [creatingCategory, setCreatingCategory] = useState(false)
+  const [pendingGallery, setPendingGallery] = useState([])
+  const { categories, refresh: refreshCategories } = useCategories()
+
+  const sortedProducts = useMemo(() => {
+    const list = [...products]
+    if (sortBy === 'default') return list
+
+    list.sort((a, b) => {
+      let cmp = 0
+      if (sortBy === 'price') {
+        cmp = getProductListPrice(a) - getProductListPrice(b)
+      } else if (sortBy === 'stock') {
+        const sa = getProductTotalStock(a)
+        const sb = getProductTotalStock(b)
+        cmp = (sa ?? -1) - (sb ?? -1)
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+    return list
+  }, [products, sortBy, sortDir])
+
+  const handleSort = (key) => {
+    if (key === 'default') {
+      setSortBy('default')
+      setSortDir('asc')
+      return
+    }
+    if (sortBy === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortBy(key)
+      setSortDir('asc')
+    }
+  }
 
   const loadProducts = () =>
     fetchProducts()
@@ -91,9 +176,9 @@ export default function AdminProductsPage() {
     loadProducts().finally(() => setLoading(false))
   }, [])
 
-  const isMayTinh = form.category === 'may-tinh'
-
   const resetForm = () => {
+    pendingGallery.forEach((item) => URL.revokeObjectURL(item.previewUrl))
+    setPendingGallery([])
     setForm(EMPTY_FORM)
     setEditingId(null)
     setFormError('')
@@ -107,49 +192,201 @@ export default function AdminProductsPage() {
     setLocalPreviews({})
   }
 
+  useEffect(() => {
+    if (!addMode || loading) return
+    resetForm()
+  }, [addMode, loading])
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
-  const toggleColor = (key) => {
-    setForm((prev) => {
-      const has = prev.colorKeys.includes(key)
-      return {
-        ...prev,
-        colorKeys: has
-          ? prev.colorKeys.filter((k) => k !== key)
-          : [...prev.colorKeys, key],
+  const normalizePastedImageFile = (file) => {
+    if (file.name) return file
+    const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') || 'png'
+    return new File([file], `pasted-${Date.now()}.${ext}`, { type: file.type })
+  }
+
+  const uploadGalleryFile = useCallback(
+    async (rawFile, category) => {
+      if (!rawFile || !category?.trim()) return false
+
+      const file = normalizePastedImageFile(rawFile)
+
+      if (!file.type.startsWith('image/')) {
+        setFormError('Chỉ chấp nhận file ảnh (JPG, PNG, WebP).')
+        return false
       }
+      if (file.size > 2 * 1024 * 1024) {
+        setFormError('Ảnh tối đa 2MB.')
+        return false
+      }
+
+      let previewKey = ''
+      let imageIndex = 0
+      let productName = ''
+      setForm((prev) => {
+        imageIndex = prev.gallery_images?.length || 0
+        productName = prev.name || ''
+        previewKey = `gallery-${imageIndex}`
+        return prev
+      })
+
+      const previewUrl = URL.createObjectURL(file)
+      setLocalPreviews((prev) => ({ ...prev, [previewKey]: previewUrl }))
+      setUploadingField('gallery')
+      setFormError('')
+
+      try {
+        const path = await apiAdminUploadImage(token, file, category, {
+          productName,
+          imageIndex,
+        })
+        setForm((prev) => {
+          const images = [...(prev.gallery_images || []), path]
+          return { ...prev, ...syncGalleryFields(images) }
+        })
+        return true
+      } catch (err) {
+        setFormError(err.message || 'Không tải được ảnh.')
+        setLocalPreviews((prev) => {
+          const next = { ...prev }
+          delete next[previewKey]
+          return next
+        })
+        return false
+      } finally {
+        setUploadingField('')
+      }
+    },
+    [token],
+  )
+
+  const uploadGalleryImage = useCallback(
+    async (rawFile) => {
+      if (!rawFile) return false
+
+      const file = normalizePastedImageFile(rawFile)
+
+      if (!file.type.startsWith('image/')) {
+        setFormError('Chỉ chấp nhận file ảnh (JPG, PNG, WebP).')
+        return false
+      }
+      if (file.size > 2 * 1024 * 1024) {
+        setFormError('Ảnh tối đa 2MB.')
+        return false
+      }
+
+      if (!form.category?.trim()) {
+        const id = `pending-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`
+        setPendingGallery((prev) => [
+          ...prev,
+          { id, file, previewUrl: URL.createObjectURL(file) },
+        ])
+        setFormError('')
+        return true
+      }
+
+      return uploadGalleryFile(file, form.category)
+    },
+    [form.category, uploadGalleryFile],
+  )
+
+  useEffect(() => {
+    if (!form.category?.trim()) return
+
+    setPendingGallery((prev) => {
+      if (!prev.length) return prev
+
+      const queue = [...prev]
+      ;(async () => {
+        for (const item of queue) {
+          await uploadGalleryFile(item.file, form.category)
+          URL.revokeObjectURL(item.previewUrl)
+        }
+      })()
+
+      return []
+    })
+  }, [form.category, uploadGalleryFile])
+
+  const handleGalleryUpload = async (e) => {
+    const file = e.target.files?.[0]
+    await uploadGalleryImage(file)
+    e.target.value = ''
+  }
+
+  useEffect(() => {
+    if (!addMode && !editingId) return
+
+    const onPaste = async (e) => {
+      const items = e.clipboardData?.items
+      if (!items?.length) return
+
+      const imageFiles = []
+      for (const item of items) {
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) imageFiles.push(file)
+        }
+      }
+      if (!imageFiles.length) return
+
+      e.preventDefault()
+      e.stopPropagation()
+      for (const file of imageFiles) {
+        await uploadGalleryImage(file)
+      }
+    }
+
+    document.addEventListener('paste', onPaste, true)
+    return () => document.removeEventListener('paste', onPaste, true)
+  }, [addMode, editingId, uploadGalleryImage])
+
+  const handleGalleryRemove = (index) => {
+    setForm((prev) => {
+      const images = (prev.gallery_images || []).filter((_, i) => i !== index)
+      return { ...prev, ...syncGalleryFields(images) }
+    })
+    setLocalPreviews((prev) => {
+      const next = { ...prev }
+      delete next[`gallery-${index}`]
+      return next
     })
   }
 
-  const handleFileChange = async (field, e) => {
+  const handleVideoUpload = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
 
-    if (!file.type.startsWith('image/')) {
-      setFormError('Chỉ chấp nhận file ảnh (JPG, PNG, WebP).')
+    if (!form.category?.trim()) {
+      setFormError('Vui lòng chọn danh mục trước khi tải video.')
       return
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setFormError('Ảnh tối đa 2MB.')
+
+    if (!file.type.startsWith('video/')) {
+      setFormError('Chỉ chấp nhận file video (MP4, WebM).')
+      return
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setFormError('Video tối đa 20MB.')
       return
     }
 
     const previewUrl = URL.createObjectURL(file)
-    setLocalPreviews((prev) => ({ ...prev, [field]: previewUrl }))
-    setUploadingField(field)
+    setLocalPreviews((prev) => ({ ...prev, video: previewUrl }))
+    setUploadingField('video')
     setFormError('')
 
     try {
-      const path = await apiAdminUploadImage(token, file, form.category)
-      setForm((prev) => ({ ...prev, [field]: path }))
+      const path = await apiAdminUploadVideo(token, file, form.category)
+      setForm((prev) => ({ ...prev, gallery_video: path }))
     } catch (err) {
-      setFormError(err.message || 'Không tải được ảnh.')
+      setFormError(err.message || 'Không tải được video.')
       setLocalPreviews((prev) => {
         const next = { ...prev }
-        delete next[field]
+        delete next.video
         return next
       })
     } finally {
@@ -158,67 +395,145 @@ export default function AdminProductsPage() {
     }
   }
 
-  const buildPayload = () => {
-    const name = form.name.trim()
-    const price = Number(form.price)
-    const image = form.image.trim()
+  const handleVideoRemove = () => {
+    setForm((prev) => ({ ...prev, gallery_video: '' }))
+    setLocalPreviews((prev) => {
+      const next = { ...prev }
+      delete next.video
+      return next
+    })
+  }
 
-    const colors = form.colorKeys
-      .map((key) => ADMIN_COLOR_OPTIONS.find((o) => o.key === key))
-      .filter(Boolean)
-      .map(({ hex, label }) => ({ hex, label }))
+  const handleSkuImageUpload = async (file, previewKey) => {
+    if (!file.type.startsWith('image/')) {
+      throw new Error('Chỉ chấp nhận file ảnh (JPG, PNG, WebP).')
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      throw new Error('Ảnh tối đa 2MB.')
+    }
+
+    const previewUrl = URL.createObjectURL(file)
+    setLocalPreviews((prev) => ({ ...prev, [previewKey]: previewUrl }))
+    setUploadingField('sku-image')
+
+    try {
+      return await apiAdminUploadImage(token, file, form.category)
+    } finally {
+      setUploadingField('')
+    }
+  }
+
+  const buildPayload = (sourceForm = form) => {
+    const name = sourceForm.name.trim()
+    const image = sourceForm.image.trim()
+    const category = sourceForm.category
+
+    const variants = buildVariantsPayload(
+      sourceForm.variantsData,
+      Number(sourceForm.price),
+      sourceForm.simpleStock,
+    )
+    const legacy = syncLegacyFieldsFromVariants(variants, category)
+    const minVariantPrice = getMinSkuPrice(variants?.skus)
+    const price =
+      variants?.skus?.length && minVariantPrice != null
+        ? minVariantPrice
+        : Number(sourceForm.price)
 
     return {
       name,
       price,
       image,
-      category: form.category,
-      description: form.description.trim() || null,
-      hover_image: form.hover_image.trim() || null,
-      gallery_main_image: form.gallery_main_image.trim() || null,
-      gallery_video: form.gallery_video.trim() || null,
-      colors: colors.length ? colors : null,
-      price_like_new: isMayTinh
-        ? parseOptionalPrice(form.price_like_new)
-        : null,
-      price_85: isMayTinh ? parseOptionalPrice(form.price_85) : null,
-      price_70: isMayTinh ? parseOptionalPrice(form.price_70) : null,
-      price_55: isMayTinh ? parseOptionalPrice(form.price_55) : null,
+      category,
+      description: sourceForm.description.trim() || null,
+      hover_image: sourceForm.hover_image.trim() || null,
+      gallery_main_image: sourceForm.gallery_main_image.trim() || null,
+      gallery_video: sourceForm.gallery_video.trim() || null,
+      gallery_images: (sourceForm.gallery_images || [])
+        .map((p) => String(p).trim())
+        .filter(Boolean),
+      variants,
+      colors: legacy.colors,
+      price_like_new: legacy.price_like_new,
+      price_85: legacy.price_85,
+      price_70: legacy.price_70,
+      price_55: legacy.price_55,
     }
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e, formOverride, variantMeta) => {
     e.preventDefault()
     setFormError('')
 
-    const name = form.name.trim()
-    const price = Number(form.price)
-    const image = form.image.trim()
-
+    const data = formOverride || form
+    const name = data.name.trim()
+    const image = data.image.trim()
     if (!name) return setFormError('Vui lòng nhập tên sản phẩm.')
-    if (!Number.isInteger(price) || price < 1000)
-      return setFormError('Giá niêm yết phải là số nguyên, tối thiểu 1.000đ.')
-    if (!image) return setFormError('Vui lòng tải ảnh đại diện (thumbnail) lên.')
+    if (!data.category?.trim()) {
+      return setFormError('Vui lòng chọn danh mục sản phẩm.')
+    }
+    if (!image) return setFormError('Vui lòng tải ít nhất ảnh bìa (ảnh đầu tiên).')
+    if (!editingId && !data.description?.trim()) {
+      return setFormError('Vui lòng nhập mô tả sản phẩm.')
+    }
     if (uploadingField)
-      return setFormError('Đang tải ảnh, vui lòng đợi.')
+      return setFormError('Đang tải file, vui lòng đợi.')
 
-    if (isMayTinh) {
-      const tiers = [
-        form.price_like_new,
-        form.price_85,
-        form.price_70,
-        form.price_55,
-      ].filter((v) => v !== '')
-      for (const v of tiers) {
-        const n = Number(v)
-        if (!Number.isInteger(n) || n < 1000) {
-          return setFormError('Giá theo độ mới phải là số nguyên, tối thiểu 1.000đ.')
+    if (variantMeta?.hasVariants) {
+      const activeGroups = getActiveVariantGroups(variantMeta.variantGroups || [])
+      if (!activeGroups.length) {
+        return setFormError(
+          'Vui lòng nhập ít nhất một nhóm phân loại có tên và tùy chọn (vd: Loại máy → 570VN). Phân loại 2 không bắt buộc — để trống sẽ bỏ qua.',
+        )
+      }
+
+      const previewVariants = buildVariantsPayload(
+        {
+          groups: variantMeta.variantGroups,
+          skus: variantMeta.variantSkus,
+        },
+        0,
+        '',
+      )
+      const skus = previewVariants?.skus || []
+
+      if (!skus.length) {
+        return setFormError(
+          'Vui lòng nhập giá (tối thiểu 1.000đ) cho ít nhất một phân loại trong bảng.',
+        )
+      }
+
+      for (const sku of skus) {
+        const skuPrice = Number(sku.price)
+        const label =
+          getSkuDisplayLabel(previewVariants.groups, sku) || 'phân loại'
+        if (!Number.isInteger(skuPrice) || skuPrice < 1000) {
+          return setFormError(`Giá "${label}" phải tối thiểu 1.000đ.`)
+        }
+        if (sku.stock !== '' && sku.stock != null) {
+          const stock = Number(sku.stock)
+          if (!Number.isInteger(stock) || stock < 0) {
+            return setFormError('Kho hàng phải là số nguyên không âm.')
+          }
+        }
+      }
+    } else {
+      const price = Number(data.price)
+      if (!Number.isInteger(price) || price < 1000) {
+        return setFormError('Giá phải là số nguyên, tối thiểu 1.000đ.')
+      }
+      const stockRaw = data.simpleStock
+      if (stockRaw !== '' && stockRaw != null) {
+        const stock = Number(stockRaw)
+        if (!Number.isInteger(stock) || stock < 0) {
+          return setFormError('Kho hàng phải là số nguyên không âm.')
         }
       }
     }
 
-    const payload = buildPayload()
+    const payload = buildPayload(data)
 
+    const wasNew = !editingId
     setSaving(true)
     try {
       if (editingId) {
@@ -230,12 +545,21 @@ export default function AdminProductsPage() {
         const created = await apiAdminCreateProduct(token, payload)
         setProducts((prev) => [...prev, created].sort((a, b) => a.id - b.id))
       }
+      showToast(
+        wasNew ? 'Bạn đã thêm sản phẩm thành công' : 'Bạn đã sửa sản phẩm thành công',
+      )
       resetForm()
+      navigate('/admin/san-pham')
     } catch (err) {
       setFormError(err.message || 'Không lưu được sản phẩm.')
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleCancelForm = () => {
+    resetForm()
+    navigate('/admin/san-pham')
   }
 
   const handleDelete = async (product) => {
@@ -245,269 +569,165 @@ export default function AdminProductsPage() {
       await apiAdminDeleteProduct(token, product.id)
       setProducts((prev) => prev.filter((p) => p.id !== product.id))
       if (editingId === product.id) resetForm()
+      showToast('Bạn đã xóa sản phẩm thành công')
     } catch (err) {
       alert(err.message || 'Không xóa được sản phẩm.')
     }
   }
 
-  const previewFor = (field, path) =>
-    localPreviews[field] || (path ? productImageSrc(path) : '')
+  const previewFor = (field, path) => {
+    if (localPreviews[field]) return localPreviews[field]
+    return path ? productImageSrc(path) : ''
+  }
 
-  const renderUpload = (field, label, required = false) => (
-    <div className="admin-products-upload" key={field}>
-      <span className="admin-products-upload-label">
-        {label}
-        {required && ' *'}
-      </span>
-      <input
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        onChange={(e) => handleFileChange(field, e)}
-        disabled={!!uploadingField}
-      />
-      {uploadingField === field && (
-        <p className="admin-products-upload-status">Đang tải ảnh...</p>
-      )}
-      {form[field] && uploadingField !== field && (
-        <p className="admin-products-upload-path">{form[field]}</p>
-      )}
-      {previewFor(field, form[field]) && (
-        <div className="admin-products-preview">
-          <img src={previewFor(field, form[field])} alt="" />
-        </div>
-      )}
-    </div>
-  )
+  const handleCreateCategory = async (label) => {
+    const name = String(label || '').trim()
+    if (!name) throw new Error('Vui lòng nhập tên danh mục.')
+
+    setCreatingCategory(true)
+    setFormError('')
+    try {
+      const category = await apiAdminCreateCategory(token, { label: name })
+      await refreshCategories()
+      setForm((prev) => ({ ...prev, category: category.slug }))
+      return category
+    } finally {
+      setCreatingCategory(false)
+    }
+  }
 
   if (loading) return <p className="admin-products">Đang tải...</p>
   if (error) return <p className="admin-products admin-products--error">{error}</p>
 
+  if (addMode || editingId) {
+    return (
+      <AdminProductFormShopee
+        form={form}
+        setForm={setForm}
+        editingId={editingId}
+        saving={saving}
+        uploadingField={uploadingField}
+        formError={formError}
+        localPreviews={localPreviews}
+        onChange={handleChange}
+        onGalleryUpload={handleGalleryUpload}
+        onGalleryPaste={uploadGalleryImage}
+        pendingGallery={pendingGallery}
+        onPendingGalleryRemove={(id) => {
+          setPendingGallery((prev) => {
+            const item = prev.find((p) => p.id === id)
+            if (item) URL.revokeObjectURL(item.previewUrl)
+            return prev.filter((p) => p.id !== id)
+          })
+        }}
+        onGalleryRemove={handleGalleryRemove}
+        onVideoUpload={handleVideoUpload}
+        onVideoRemove={handleVideoRemove}
+        onSkuImageUpload={handleSkuImageUpload}
+        onSubmit={handleSubmit}
+        onCancel={editingId ? resetForm : handleCancelForm}
+        previewFor={previewFor}
+        categories={categories}
+        onCreateCategory={handleCreateCategory}
+        creatingCategory={creatingCategory}
+      />
+    )
+  }
+
   return (
     <div className="admin-products">
       <header className="admin-products-header">
-        <h1>Quản lý sản phẩm</h1>
-        <Link to="/admin">← Về admin</Link>
+        <h1>Tất cả sản phẩm</h1>
       </header>
 
-      <section className="admin-products-form-card">
-        <h2>{editingId ? `Sửa sản phẩm #${editingId}` : 'Thêm sản phẩm mới'}</h2>
-        <form className="admin-products-form" onSubmit={handleSubmit}>
-          <fieldset className="admin-products-fieldset">
-            <legend>Thông tin cơ bản</legend>
-            <div className="admin-products-grid">
-              <label>
-                Tên sản phẩm *
-                <input name="name" value={form.name} onChange={handleChange} required />
-              </label>
-              <label>
-                Giá niêm yết (VNĐ) *
-                <input
-                  name="price"
-                  type="number"
-                  min="1000"
-                  step="1000"
-                  value={form.price}
-                  onChange={handleChange}
-                  required
-                />
-              </label>
-              <label>
-                Danh mục *
-                <select name="category" value={form.category} onChange={handleChange}>
-                  {CATEGORIES.map((c) => (
-                    <option key={c.value} value={c.value}>
-                      {c.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
+      <section className="admin-products-list">
+        <div className="admin-products-list-head">
+          <h2>Danh sách ({products.length})</h2>
+          {products.length > 0 && (
+            <div className="admin-products-sort">
+              <span className="admin-products-sort-label">Sắp xếp theo:</span>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  type="button"
+                  className={`admin-products-sort-btn${
+                    sortBy === opt.key ? ' admin-products-sort-btn--active' : ''
+                  }`}
+                  onClick={() => handleSort(opt.key)}
+                >
+                  {opt.label}
+                  {sortBy === opt.key && opt.key !== 'default' && (
+                    <span className="admin-products-sort-arrow" aria-hidden>
+                      {sortDir === 'asc' ? ' ↑' : ' ↓'}
+                    </span>
+                  )}
+                </button>
+              ))}
             </div>
-            {renderUpload('image', 'Ảnh đại diện (thumbnail / cửa hàng)', true)}
-          </fieldset>
+          )}
+        </div>
+        {products.length === 0 ? (
+          <p className="admin-products-empty">Chưa có sản phẩm.</p>
+        ) : (
+          <div className="admin-products-grid-shopee">
+            {sortedProducts.map((product) => {
+              const stock = getProductTotalStock(product)
 
-          <fieldset className="admin-products-fieldset">
-            <legend>Trang chi tiết</legend>
-            <label>
-              Mô tả sản phẩm
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                rows={4}
-                placeholder="Mô tả hiển thị tab Mô tả trên trang sản phẩm..."
-              />
-            </label>
-            {renderUpload('hover_image', 'Ảnh hover (card / góc khác)')}
-            {renderUpload(
-              'gallery_main_image',
-              'Ảnh bìa gallery (trang chi tiết)',
-            )}
-            <label>
-              Video gallery (đường dẫn)
-              <input
-                name="gallery_video"
-                value={form.gallery_video}
-                onChange={handleChange}
-                placeholder="/video/may-tinh/580vnx.mp4"
-              />
-            </label>
-          </fieldset>
-
-          <fieldset className="admin-products-fieldset">
-            <legend>Màu sắc</legend>
-            <div className="admin-products-colors">
-              {ADMIN_COLOR_OPTIONS.map((opt) => {
-                const active = form.colorKeys.includes(opt.key)
-                return (
-                  <label
-                    key={opt.key}
-                    className={`admin-products-color-opt${active ? ' admin-products-color-opt--active' : ''}`}
-                    title={opt.label}
+              return (
+                <article key={product.id} className="admin-product-card">
+                  <button
+                    type="button"
+                    className="admin-product-card-image"
+                    onClick={() => startEdit(product)}
+                    aria-label={`Sửa ${product.name}`}
+                    title="Sửa sản phẩm"
                   >
-                    <input
-                      type="checkbox"
-                      className="admin-products-color-check"
-                      checked={active}
-                      onChange={() => toggleColor(opt.key)}
-                      aria-label={opt.label}
-                    />
+                    <img src={product.image} alt="" />
+                  </button>
+                  <div className="admin-product-card-body">
+                    <h3 className="admin-product-card-name">{product.name}</h3>
+                    <p className="admin-product-card-price">
+                      {formatProductListPrice(product, formatPrice)}
+                    </p>
+                    <p className="admin-product-card-stock">
+                      Kho hàng{' '}
+                      <span>{stock != null ? stock : '—'}</span>
+                    </p>
+                  </div>
+                  <footer className="admin-product-card-actions">
+                    <button
+                      type="button"
+                      className="admin-product-card-action admin-product-card-action--edit"
+                      onClick={() => startEdit(product)}
+                      aria-label={`Sửa ${product.name}`}
+                      title="Sửa"
+                    >
+                      <img src={ICON_PEN} alt="" />
+                    </button>
                     <span
-                      className="admin-products-color-swatch"
-                      style={{ backgroundColor: opt.hex }}
+                      className="admin-product-card-actions-divider"
                       aria-hidden
                     />
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
-
-          {isMayTinh && (
-            <fieldset className="admin-products-fieldset">
-              <legend>Giá theo độ mới (máy tính)</legend>
-              <div className="admin-products-grid admin-products-grid--4">
-                <label>
-                  LIKE NEW
-                  <input
-                    name="price_like_new"
-                    type="number"
-                    min="1000"
-                    step="1000"
-                    value={form.price_like_new}
-                    onChange={handleChange}
-                    placeholder="520000"
-                  />
-                </label>
-                <label>
-                  85%
-                  <input
-                    name="price_85"
-                    type="number"
-                    min="1000"
-                    step="1000"
-                    value={form.price_85}
-                    onChange={handleChange}
-                    placeholder="465000"
-                  />
-                </label>
-                <label>
-                  70%
-                  <input
-                    name="price_70"
-                    type="number"
-                    min="1000"
-                    step="1000"
-                    value={form.price_70}
-                    onChange={handleChange}
-                    placeholder="415000"
-                  />
-                </label>
-                <label>
-                  55%
-                  <input
-                    name="price_55"
-                    type="number"
-                    min="1000"
-                    step="1000"
-                    value={form.price_55}
-                    onChange={handleChange}
-                    placeholder="355000"
-                  />
-                </label>
-              </div>
-            </fieldset>
-          )}
-
-          {formError && <p className="admin-products-form-error">{formError}</p>}
-
-          <div className="admin-products-form-actions">
-            <button
-              type="submit"
-              className="admin-products-btn admin-products-btn--primary"
-              disabled={saving || !!uploadingField}
-            >
-              {saving ? 'Đang lưu...' : editingId ? 'Cập nhật' : 'Thêm sản phẩm'}
-            </button>
-            {editingId && (
-              <button type="button" className="admin-products-btn" onClick={resetForm}>
-                Hủy sửa
-              </button>
-            )}
-          </div>
-        </form>
-      </section>
-
-      <section className="admin-products-list">
-        <h2>Danh sách ({products.length})</h2>
-        {products.length === 0 ? (
-          <p>Chưa có sản phẩm.</p>
-        ) : (
-          <div className="admin-products-table-wrap">
-            <table className="admin-products-table">
-              <thead>
-                <tr>
-                  <th>Ảnh</th>
-                  <th>Tên</th>
-                  <th>Giá</th>
-                  <th>Danh mục</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <img
-                        className="admin-products-thumb"
-                        src={product.image}
-                        alt=""
-                      />
-                    </td>
-                    <td>{product.name}</td>
-                    <td>{formatPrice(product.price)}</td>
-                    <td>
-                      {CATEGORIES.find((c) => c.value === product.category)?.label ||
-                        product.category}
-                    </td>
-                    <td className="admin-products-row-actions">
-                      <button type="button" onClick={() => startEdit(product)}>
-                        Sửa
-                      </button>
-                      <button
-                        type="button"
-                        className="admin-products-delete"
-                        onClick={() => handleDelete(product)}
-                      >
-                        Xóa
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <button
+                      type="button"
+                      className="admin-product-card-action admin-product-card-action--delete"
+                      onClick={() => handleDelete(product)}
+                      aria-label={`Xóa ${product.name}`}
+                      title="Xóa"
+                    >
+                      <img src={ICON_TRASH} alt="" />
+                    </button>
+                  </footer>
+                </article>
+              )
+            })}
           </div>
         )}
       </section>
+
+      <Link to="/admin/san-pham/them" className="admin-products-fab">
+        + Thêm sản phẩm
+      </Link>
     </div>
   )
 }

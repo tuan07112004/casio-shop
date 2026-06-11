@@ -7,8 +7,10 @@ export const ORDER_STATUS_LABEL = {
 }
 
 export const PAYMENT_METHOD_LABEL = {
-  cod: 'COD',
+  cod: 'Thanh toán khi giao hàng (COD)',
   bank_transfer: 'Chuyển khoản',
+  momo: 'Ví MoMo',
+  vnpay: 'VNPAY',
 }
 
 export const PAYMENT_STATUS_LABEL = {

@@ -1,14 +1,23 @@
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
+import { getShopCategoryUrl } from '../../config/categories'
+import { useCategories } from '../../context/CategoriesContext'
 import './Footer.css'
 
-const PRODUCT_LINKS = [
-  { to: '/cua-hang', label: 'Tất cả sản phẩm' },
-  { to: '/cua-hang?category=may-tinh', label: 'Máy tính' },
-  { to: '/cua-hang?category=phu-kien', label: 'Phụ kiện' },
-  { to: '/cua-hang?category=balo', label: 'Balo' },
-]
-
 export default function Footer() {
+  const { categories } = useCategories()
+
+  const productLinks = useMemo(
+    () => [
+      { to: '/cua-hang', label: 'Tất cả sản phẩm' },
+      ...categories.map((c) => ({
+        to: getShopCategoryUrl(c.value),
+        label: c.shopLabel,
+      })),
+    ],
+    [categories],
+  )
+
   return (
     <footer className="site-footer" id="lien-he">
       <div className="footer-inner">
@@ -27,7 +36,7 @@ export default function Footer() {
           <div className="footer-col">
             <h3 className="footer-col-title">Sản phẩm</h3>
             <nav className="footer-nav">
-              {PRODUCT_LINKS.map((item) => (
+              {productLinks.map((item) => (
                 <Link key={item.to} to={item.to}>
                   {item.label}
                 </Link>
@@ -38,15 +47,13 @@ export default function Footer() {
           <div className="footer-col">
             <h3 className="footer-col-title">Hỗ trợ</h3>
             <nav className="footer-nav">
-              <Link to="/">Trang chủ</Link>
-              <Link to="/gio-hang">Giỏ hàng</Link>
+              <Link to="/faq">Câu hỏi thường gặp</Link>
               <Link to="/tra-cuu-don">Tra cứu đơn hàng</Link>
-              <Link to="/faq">FAQ</Link>
-              <a href="tel:19002152">Hotline: 1900 2152</a>
-              <a href="mailto:lytuscasio@gmail.com">lytuscasio@gmail.com</a>
             </nav>
           </div>
         </div>
+
+        <p className="footer-copy">© {new Date().getFullYear()} Lytus Casio Shop</p>
       </div>
     </footer>
   )

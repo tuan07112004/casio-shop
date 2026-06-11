@@ -7,20 +7,17 @@ import {
   useSearchParams,
 } from 'react-router-dom'
 import { fetchProducts, filterProductsByQuery } from '../../api/client'
+import { getShopCategoryUrl } from '../../config/categories'
 import { useAuth } from '../../context/AuthContext'
+import { useCategories } from '../../context/CategoriesContext'
 import { useCart } from '../../context/CartContext'
 import useAnimated from '../../hooks/useAnimated'
+import { productDetailPath } from '../../utils/cartLine'
 import { formatPrice, productImageSrc } from '../../utils/format'
 import HeaderSalePromo from '../HeaderSalePromo/HeaderSalePromo'
 import './Header.css'
 
 const LIVE_SEARCH_LIMIT = 6
-
-const productLinks = [
-  { to: '/cua-hang?category=may-tinh', label: 'Máy tính Casio' },
-  { to: '/cua-hang?category=phu-kien', label: 'Văn phòng phẩm' },
-  { to: '/cua-hang?category=balo', label: 'Cặp, Ba lô' },
-]
 
 const accountIcon = (
   <span className="header-account-icon" aria-hidden>
@@ -205,39 +202,43 @@ function AccountMenu({ isLoggedIn, user, booting, isAdmin, logout }) {
           <ul className="header-account-menu">
             {isLoggedIn ? (
               <>
-                <li>
-                  <Link
-                    to="/tai-khoan"
-                    className="header-account-menu-item"
-                    role="menuitem"
-                    onClick={close}
-                  >
-                    {menuIcons.overview}
-                    Tổng quan
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/tai-khoan/don-hang"
-                    className="header-account-menu-item"
-                    role="menuitem"
-                    onClick={close}
-                  >
-                    {menuIcons.orders}
-                    Đơn hàng của tôi
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/tai-khoan/tra-cuu"
-                    className="header-account-menu-item"
-                    role="menuitem"
-                    onClick={close}
-                  >
-                    {menuIcons.lookup}
-                    Tra cứu đơn hàng
-                  </Link>
-                </li>
+                {!isAdmin && (
+                  <>
+                    <li>
+                      <Link
+                        to="/tai-khoan"
+                        className="header-account-menu-item"
+                        role="menuitem"
+                        onClick={close}
+                      >
+                        {menuIcons.overview}
+                        Tổng quan
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/tai-khoan/don-hang"
+                        className="header-account-menu-item"
+                        role="menuitem"
+                        onClick={close}
+                      >
+                        {menuIcons.orders}
+                        Đơn hàng của tôi
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        to="/tai-khoan/tra-cuu"
+                        className="header-account-menu-item"
+                        role="menuitem"
+                        onClick={close}
+                      >
+                        {menuIcons.lookup}
+                        Tra cứu đơn hàng
+                      </Link>
+                    </li>
+                  </>
+                )}
                 {isAdmin && (
                   <li>
                     <Link
@@ -312,6 +313,15 @@ function AccountMenu({ isLoggedIn, user, booting, isAdmin, logout }) {
 }
 
 export default function Header() {
+  const { categories } = useCategories()
+  const productLinks = useMemo(
+    () =>
+      categories.map((c) => ({
+        to: getShopCategoryUrl(c.value),
+        label: c.label,
+      })),
+    [categories],
+  )
   const { totalItems } = useCart()
   const { user, isLoggedIn, logout, booting, isAdmin } = useAuth()
   const navigate = useNavigate()
@@ -455,7 +465,7 @@ export default function Header() {
                           {livePreview.map((p) => (
                             <li key={p.id}>
                               <Link
-                                to={`/san-pham/${p.id}`}
+                                to={productDetailPath(p)}
                                 className="header-search-result"
                                 onClick={closeSearch}
                               >
@@ -552,24 +562,26 @@ export default function Header() {
               logout={logout}
             />
 
-            <NavLink
-              to="/gio-hang"
-              className={({ isActive }) =>
-                `header-cart${isActive ? ' active' : ''}`
-              }
-            >
-              <img
-                src="/images/icon/iconGioHang.png"
-                alt=""
-                className="header-cart-icon"
-                width={32}
-                height={32}
-              />
-              <span className="header-cart-label">Giỏ hàng</span>
-              {totalItems > 0 && (
-                <span className="header-cart-badge">{totalItems}</span>
-              )}
-            </NavLink>
+            {!isAdmin && (
+              <NavLink
+                to="/gio-hang"
+                className={({ isActive }) =>
+                  `header-cart${isActive ? ' active' : ''}`
+                }
+              >
+                <img
+                  src="/images/icon/iconGioHang.png"
+                  alt=""
+                  className="header-cart-icon"
+                  width={32}
+                  height={32}
+                />
+                <span className="header-cart-label">Giỏ hàng</span>
+                {totalItems > 0 && (
+                  <span className="header-cart-badge">{totalItems}</span>
+                )}
+              </NavLink>
+            )}
           </div>
         </div>
       </header>

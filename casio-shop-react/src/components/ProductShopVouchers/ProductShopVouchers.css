@@ -1,0 +1,70 @@
+.product-shop-vouchers {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.product-shop-vouchers-label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.product-shop-vouchers-track {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.product-shop-voucher-card {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: stretch;
+  min-width: 220px;
+  max-width: 280px;
+  border: 1px solid #ffd6cc;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #fff8f6 0%, #fff 100%);
+  overflow: hidden;
+}
+
+.product-shop-voucher-main {
+  flex: 1;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.product-shop-voucher-main strong {
+  font-size: 0.82rem;
+  color: #ee4d2d;
+  line-height: 1.35;
+}
+
+.product-shop-voucher-main span {
+  font-size: 0.72rem;
+  color: #9a9a9a;
+}
+
+.product-shop-voucher-save {
+  flex-shrink: 0;
+  width: 56px;
+  border: none;
+  border-left: 1px dashed #ffd6cc;
+  background: #fff5f2;
+  color: #ee4d2d;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.product-shop-voucher-save--saved {
+  color: #9a9a9a;
+  cursor: default;
+}

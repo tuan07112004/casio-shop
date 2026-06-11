@@ -1,72 +1,198 @@
-﻿.admin-shell {
-    min-height: 100vh;
-    background: #eef1f4;
-    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+.admin-shell {
+  --admin-topbar-height: 95px;
+  min-height: 100vh;
+  background: #f5f5f5;
+  font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+}
+
+.admin-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.admin-topbar::after {
+  content: '';
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff7337 50%, #ee4d2d 100%);
+}
+
+.admin-topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 14px 28px;
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.admin-topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.admin-topbar-brand:hover {
+  opacity: 0.88;
+}
+
+.admin-topbar-logo {
+  display: block;
+  height: 64px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.admin-topbar-brand-sub {
+  position: relative;
+  padding-left: 14px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #222;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.admin-topbar-brand-sub::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 1px;
+  height: 28px;
+  background: #e0e0e0;
+}
+
+.admin-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-topbar-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: #f7f7f7;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.admin-topbar-user::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ee4d2d;
+  flex-shrink: 0;
+}
+
+.admin-topbar-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #d9e8ff;
+  background: #f5f9ff;
+  font-size: 0.86rem;
+  font-weight: 500;
+  color: #2673dd;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.admin-topbar-link:hover {
+  background: #e8f2ff;
+  border-color: #2673dd;
+  text-decoration: none;
+}
+
+.admin-topbar-logout {
+  padding: 8px 18px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  color: #444;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.admin-topbar-logout:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  background: #fff8f6;
+}
+
+.admin-body {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(100vh - 95px);
+}
+
+.admin-content {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+  padding: 20px 24px 48px;
+}
+
+@media (max-width: 900px) {
+  .admin-shell {
+    --admin-topbar-height: 88px;
   }
-  
-  .admin-shell-header {
-    background: #1a2332;
-    color: #fff;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.12);
+
+  .admin-topbar-inner {
+    padding: 12px 16px;
   }
-  
-  .admin-shell-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 14px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    flex-wrap: wrap;
+
+  .admin-topbar-logo {
+    height: 52px;
+    max-width: 180px;
   }
-  
-  .admin-shell-brand {
-    font-family: var(--font-display);
-    font-size: 1.15rem;
-    color: #fff;
-    text-decoration: none;
+
+  .admin-topbar-brand-sub {
+    font-size: 0.95rem;
   }
-  
-  .admin-shell-actions {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    flex-wrap: wrap;
+
+  .admin-body {
+    flex-direction: column;
+    min-height: calc(100vh - 88px);
   }
-  
-  .admin-shell-user {
-    font-size: 0.9rem;
-    opacity: 0.9;
+
+  .admin-content {
+    padding: 16px;
   }
-  
-  .admin-shell-link {
-    font-size: 0.85rem;
-    color: #7dd3fc;
-    text-decoration: none;
+}
+
+@media (max-width: 560px) {
+  .admin-topbar-brand-sub::before {
+    display: none;
   }
-  
-  .admin-shell-link:hover {
-    text-decoration: underline;
+
+  .admin-topbar-brand-sub {
+    padding-left: 0;
   }
-  
-  .admin-shell-logout {
-    padding: 8px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 8px;
-    background: transparent;
-    color: #fff;
-    font: inherit;
-    font-size: 0.85rem;
-    cursor: pointer;
+
+  .admin-topbar-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
-  
-  .admin-shell-logout:hover {
-    background: rgba(255, 255, 255, 0.1);
-  }
-  
-  .admin-shell-main {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 32px 20px 48px;
-  }
+}

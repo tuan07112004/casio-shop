@@ -3,6 +3,18 @@ import { productHoverImageSrc, productImageSrc } from './format'
 const FX580_GALLERY_DIR = '/images/products/may-tinh/580-gallery'
 const FX580_VIDEO = '/video/may-tinh/580vnx.mp4'
 
+const FX580_SLIDE_FILES = [
+  '01.jpg',
+  '02.jpg',
+  '03.jpg',
+  '04.jpg',
+  '05.jpg',
+  '06.png',
+  '07.png',
+  '08.png',
+  '09.png',
+]
+
 function gallerySlides(dir, files, altPrefix) {
   return files.map((file, i) => ({
     type: 'image',
@@ -21,33 +33,40 @@ function buildDetailGallery({ mainImage, mainAlt, slides, extras = [] }) {
   return [...videos, ...slideItems, ...extraImages]
 }
 
-/** 9 ảnh mô tả dùng chung cho máy tính */
-const FX580_SLIDE_FILES = [
-  '01.jpg',
-  '02.jpg',
-  '03.jpg',
-  '04.jpg',
-  '05.jpg',
-  '06.png',
-  '07.png',
-  '08.png',
-  '09.png',
-]
-
 function sharedDescriptionSlides(altPrefix) {
   return gallerySlides(FX580_GALLERY_DIR, FX580_SLIDE_FILES, altPrefix)
 }
 
-function calculatorDetailGallery({ mainImage, mainAlt, videoSrc }) {
-  const video = videoSrc || FX580_VIDEO
+function descriptionSlidesFromGallery(product) {
+  const paths = product.galleryImages || []
+  if (paths.length <= 2) return null
+
+  return paths.slice(2).map((path, i) => ({
+    type: 'image',
+    src: productImageSrc(path),
+    alt: `${product.name} — mô tả ${i + 1}`,
+  }))
+}
+
+function calculatorDetailGallery(product) {
+  const paths = product.galleryImages || []
+  const mainImage = productImageSrc(
+    paths[0] || product.galleryMainImage || product.hoverImage || product.image,
+  )
+  const videoSrc = product.galleryVideo || FX580_VIDEO
+  const dbSlides = descriptionSlidesFromGallery(product)
+  const slides = dbSlides?.length
+    ? dbSlides
+    : sharedDescriptionSlides(product.name)
+
   return buildDetailGallery({
     mainImage,
-    mainAlt,
-    slides: sharedDescriptionSlides(mainAlt),
+    mainAlt: product.name,
+    slides,
     extras: [
       {
         type: 'video',
-        src: video,
+        src: videoSrc,
         poster: mainImage,
       },
     ],
@@ -58,25 +77,32 @@ export function getProductGallery(product) {
   if (!product) return []
 
   if (product.category === 'may-tinh') {
-    const mainImage =
-      product.galleryMainImage || product.hoverImage || product.image
-    return calculatorDetailGallery({
-      mainImage,
-      mainAlt: product.name,
-      videoSrc: product.galleryVideo || FX580_VIDEO,
-    })
+    return calculatorDetailGallery(product)
   }
 
+  const paths = product.galleryImages || []
   const extras = []
+
   if (product.galleryVideo) {
     extras.push({
       type: 'video',
       src: product.galleryVideo,
-      poster:
-        product.galleryMainImage ||
-        product.hoverImage ||
-        product.image,
+      poster: productImageSrc(
+        paths[0] || product.galleryMainImage || product.hoverImage || product.image,
+      ),
     })
+  }
+
+  if (paths.length) {
+    const items = [...extras]
+    paths.forEach((path, i) => {
+      items.push({
+        type: 'image',
+        src: productImageSrc(path),
+        alt: i < 2 ? product.name : `${product.name} — mô tả ${i - 1}`,
+      })
+    })
+    return items
   }
 
   const main = {
@@ -90,8 +116,6 @@ export function getProductGallery(product) {
     : null
 
   const videos = extras.filter((item) => item.type === 'video')
-  const extraImages = extras.filter((item) => item.type === 'image')
-
   const items = [...videos, main]
   if (hover) items.push(hover)
   if (product.galleryMainImage && product.galleryMainImage !== product.image) {
@@ -101,7 +125,6 @@ export function getProductGallery(product) {
       alt: `${product.name} — chi tiết`,
     })
   }
-  items.push(...extraImages)
 
   return items
 }

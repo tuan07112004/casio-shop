@@ -1,23 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './ProductDetailGallery.css'
 
-const THUMB_SCROLL_STEP = 246
+const THUMB_SCROLL_STEP = 110
+const ICON_ARROW_DOWN = '/images/icon/down-arrow.png'
 
 export default function ProductDetailGallery({
   items,
   productName,
   stageOverride = null,
+  onThumbSelect,
 }) {
   const [activeIndex, setActiveIndex] = useState(0)
   const [brokenSrc, setBrokenSrc] = useState(() => new Set())
-  const [canScrollLeft, setCanScrollLeft] = useState(false)
-  const [canScrollRight, setCanScrollRight] = useState(false)
+  const [canScrollUp, setCanScrollUp] = useState(false)
+  const [canScrollDown, setCanScrollDown] = useState(false)
   const videoRef = useRef(null)
   const thumbsRef = useRef(null)
+  const shouldAutoplayVideo = useRef(false)
 
   useEffect(() => {
     setActiveIndex(0)
     setBrokenSrc(new Set())
+    shouldAutoplayVideo.current = false
   }, [items])
 
   const visibleItems = useMemo(
@@ -40,9 +44,9 @@ export default function ProductDetailGallery({
   const updateScrollArrows = useCallback(() => {
     const el = thumbsRef.current
     if (!el) return
-    const { scrollLeft, scrollWidth, clientWidth } = el
-    setCanScrollLeft(scrollLeft > 2)
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 2)
+    const { scrollTop, scrollHeight, clientHeight } = el
+    setCanScrollUp(scrollTop > 2)
+    setCanScrollDown(scrollTop + clientHeight < scrollHeight - 2)
   }, [])
 
   useEffect(() => {
@@ -60,6 +64,40 @@ export default function ProductDetailGallery({
       videoRef.current.pause()
     }
   }, [activeIndex, active?.type, stageOverride])
+
+  useEffect(() => {
+    if (stageOverride || active?.type !== 'video' || !shouldAutoplayVideo.current) {
+      return
+    }
+
+    shouldAutoplayVideo.current = false
+    const video = videoRef.current
+    if (!video) return
+
+    const playVideo = () => {
+      video.play().catch(() => {})
+    }
+
+    if (video.readyState >= 2) {
+      playVideo()
+      return
+    }
+
+    video.addEventListener('loadeddata', playVideo, { once: true })
+    return () => video.removeEventListener('loadeddata', playVideo)
+  }, [activeIndex, active?.src, active?.type, stageOverride])
+
+  const selectThumb = (index, isVideo) => {
+    onThumbSelect?.()
+    if (isVideo) {
+      if (index === activeIndex && videoRef.current) {
+        videoRef.current.play().catch(() => {})
+        return
+      }
+      shouldAutoplayVideo.current = true
+    }
+    setActiveIndex(index)
+  }
 
   useEffect(() => {
     updateScrollArrows()
@@ -89,7 +127,7 @@ export default function ProductDetailGallery({
 
   const scrollThumbs = (dir) => {
     thumbsRef.current?.scrollBy({
-      left: dir * THUMB_SCROLL_STEP,
+      top: dir * THUMB_SCROLL_STEP,
       behavior: 'smooth',
     })
   }
@@ -107,8 +145,71 @@ export default function ProductDetailGallery({
     return item.src
   }
 
+  const hasMultiple = visibleItems.length > 1
+
   return (
-    <div className="product-detail-gallery">
+    <div className={`product-detail-gallery${hasMultiple ? '' : ' product-detail-gallery--single'}`}>
+      {hasMultiple && (
+        <div className="product-detail-thumbs-wrap">
+          {canScrollUp && (
+            <button
+              type="button"
+              className="product-detail-thumbs-arrow product-detail-thumbs-arrow--up"
+              onClick={() => scrollThumbs(-1)}
+              aria-label="Xem ảnh phía trên"
+            >
+              <img src={ICON_ARROW_DOWN} alt="" />
+            </button>
+          )}
+
+          <div className="product-detail-thumbs" ref={thumbsRef}>
+            {visibleItems.map((item, i) => (
+              <div
+                key={`${item.type}-${item.src}-${i}`}
+                role="button"
+                tabIndex={0}
+                className={`product-detail-thumb${i === activeIndex ? ' product-detail-thumb--active' : ''}`}
+                onMouseEnter={() => {
+                  onThumbSelect?.()
+                  setActiveIndex(i)
+                }}
+                onClick={() => selectThumb(i, item.type === 'video')}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    selectThumb(i, item.type === 'video')
+                  }
+                }}
+              >
+                <img
+                  src={thumbPoster(item)}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  onError={() => markBroken(item.src)}
+                />
+                {item.type === 'video' && (
+                  <span className="product-detail-thumb-play" aria-hidden>
+                    ▶
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {canScrollDown && (
+            <button
+              type="button"
+              className="product-detail-thumbs-arrow product-detail-thumbs-arrow--down"
+              onClick={() => scrollThumbs(1)}
+              aria-label="Xem ảnh phía dưới"
+            >
+              <img src={ICON_ARROW_DOWN} alt="" />
+            </button>
+          )}
+        </div>
+      )}
+
       <div className="product-detail-stage">
         {stageItem.type === 'video' ? (
           <video
@@ -128,57 +229,13 @@ export default function ProductDetailGallery({
             src={stageItem.src}
             alt={stageItem.alt || productName}
             className="product-detail-stage-media"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
             onError={() => markBroken(stageItem.src)}
           />
         )}
       </div>
-
-      {visibleItems.length > 1 && (
-        <div className="product-detail-thumbs-wrap">
-          {canScrollLeft && (
-            <button
-              type="button"
-              className="product-detail-thumbs-arrow product-detail-thumbs-arrow--prev"
-              onClick={() => scrollThumbs(-1)}
-              aria-label="Xem ảnh trước"
-            >
-              ‹
-            </button>
-          )}
-
-          <div className="product-detail-thumbs" ref={thumbsRef}>
-            {visibleItems.map((item, i) => (
-              <div
-                key={`${item.type}-${item.src}-${i}`}
-                className={`product-detail-thumb${i === activeIndex ? ' product-detail-thumb--active' : ''}`}
-                onMouseEnter={() => setActiveIndex(i)}
-              >
-                <img
-                  src={thumbPoster(item)}
-                  alt=""
-                  onError={() => markBroken(item.src)}
-                />
-                {item.type === 'video' && (
-                  <span className="product-detail-thumb-play" aria-hidden>
-                    ▶
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-
-          {canScrollRight && (
-            <button
-              type="button"
-              className="product-detail-thumbs-arrow product-detail-thumbs-arrow--next"
-              onClick={() => scrollThumbs(1)}
-              aria-label="Xem ảnh sau"
-            >
-              ›
-            </button>
-          )}
-        </div>
-      )}
     </div>
   )
 }
